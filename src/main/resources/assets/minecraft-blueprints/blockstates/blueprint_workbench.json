@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=east,type=left": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_left",
+      "y": 90
+    },
+    "facing=north,type=left": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_left"
+    },
+    "facing=south,type=left": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_left",
+      "y": 180
+    },
+    "facing=west,type=left": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_left",
+      "y": 270
+    },
+    "facing=east,type=right": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_right",
+      "y": 90
+    },
+    "facing=north,type=right": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_right"
+    },
+    "facing=south,type=right": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_right",
+      "y": 180
+    },
+    "facing=west,type=right": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_right",
+      "y": 270
+    },
+    "facing=east,type=toolbox": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_toolbox",
+      "y": 90
+    },
+    "facing=north,type=toolbox": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_toolbox"
+    },
+    "facing=south,type=toolbox": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_toolbox",
+      "y": 180
+    },
+    "facing=west,type=toolbox": {
+      "model": "minecraft-blueprints:block/blueprint_workbench_toolbox",
+      "y": 270
+    }
+  }
+}

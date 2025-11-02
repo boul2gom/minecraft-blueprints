@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:fabricmc.net)",
+      "WebFetch(domain:wiki.fabricmc.net)",
+      "WebFetch(domain:dev.epicgames.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

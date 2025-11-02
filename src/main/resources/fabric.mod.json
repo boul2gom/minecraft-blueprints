@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "minecraft-blueprints",
+	"version": "${version}",
+	"name": "Minecraft Blueprints",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": ["boul2gom <contact@boul2gom.com>"],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/minecraft-blueprints/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+          "fr.boul2gom.blueprints.MinecraftBlueprints"
+		],
+		"client": [
+          "fr.boul2gom.blueprints.MinecraftBlueprintsClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.17.3",
+		"minecraft": "~1.21.10",
+        "fabric-api": "*",
+		"java": ">=21"
+	}
+}
