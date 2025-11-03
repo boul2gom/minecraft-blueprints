@@ -146,17 +146,9 @@ public class BlueprintPin implements IBlueprintPin {
         final Set<IBlueprintConnection> to_remove = new HashSet<>(this.connections);
 
         for (final IBlueprintConnection connection : to_remove) {
-            // Find the other pin in this connection
-            final IBlueprintPin other_pin = connection.getOther(this);
-
-            // Remove connection from the other pin
-            if (other_pin instanceof BlueprintPin other) {
-                other.connections.remove(connection);
-            }
+            // Use helper method to remove connection from both pins
+            this.removeConnectionFromBothPins(connection);
         }
-
-        // Clear all connections from this pin
-        this.connections.clear();
 
         // TODO: Notify execution engine that graph topology has changed (for re-validation)
     }
@@ -174,15 +166,25 @@ public class BlueprintPin implements IBlueprintPin {
             return; // No connection exists
         }
 
-        // Remove connection from both pins
-        final IBlueprintConnection connection = optional.get();
-        this.connections.remove(connection);
-
-        if (pin instanceof BlueprintPin other) {
-            other.connections.remove(connection);
-        }
+        // Use helper method to remove connection from both pins
+        this.removeConnectionFromBothPins(optional.get());
 
         // TODO: Notify execution engine that graph topology has changed (for re-validation)
+    }
+
+    /**
+     * Helper method to remove a connection from both this pin and the other pin.
+     * Reduces code duplication between disconnect() and disconnectFrom().
+     */
+    private void removeConnectionFromBothPins(IBlueprintConnection connection) {
+        // Find the other pin in this connection
+        final IBlueprintPin other_pin = connection.getOther(this);
+
+        // Remove connection from both pins
+        this.connections.remove(connection);
+        if (other_pin instanceof BlueprintPin other) {
+            other.connections.remove(connection);
+        }
     }
 
     @Override
@@ -192,15 +194,10 @@ public class BlueprintPin implements IBlueprintPin {
 
     @Override
     public Set<IBlueprintPin> getPins() {
-        final Set<IBlueprintPin> pins = new HashSet<>();
-
-        for (final IBlueprintConnection connection : this.connections) {
-            // Get the other pin from this connection
-            final IBlueprintPin other_pin = connection.getOther(this);
-            pins.add(other_pin);
-        }
-
-        return Collections.unmodifiableSet(pins);
+        // Use stream for cleaner code and potential optimization
+        return this.connections.stream()
+            .map(connection -> connection.getOther(this))
+            .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
     @Override

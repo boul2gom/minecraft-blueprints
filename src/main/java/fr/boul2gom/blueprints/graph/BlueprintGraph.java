@@ -22,6 +22,10 @@ public class BlueprintGraph implements IBlueprintGraph {
 
     private final GraphValidator validator;
     private boolean is_valid;
+    
+    // Cache for entry points to avoid recalculating on every execution
+    private List<IBlueprintNode> cached_entry_points;
+    private boolean entry_points_dirty;
 
     public BlueprintGraph(String id, String name) {
         Objects.requireNonNull(id, "Graph ID may not be null");
@@ -33,6 +37,8 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.connections = new HashSet<>();
         this.validator = new GraphValidator(this);
         this.is_valid = true; // Empty graph is valid
+        this.cached_entry_points = List.of();
+        this.entry_points_dirty = false;
     }
 
     @Override
@@ -51,6 +57,7 @@ public class BlueprintGraph implements IBlueprintGraph {
 
         this.nodes.add(node);
         this.is_valid = false; // Mark as needing validation
+        this.entry_points_dirty = true; // Invalidate entry points cache
     }
 
     @Override
@@ -72,6 +79,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         // Remove the node
         this.nodes.remove(node);
         this.is_valid = false; // Mark as needing validation
+        this.entry_points_dirty = true; // Invalidate entry points cache
     }
 
     @Override
@@ -108,6 +116,7 @@ public class BlueprintGraph implements IBlueprintGraph {
 
         this.connections.add(connection);
         this.is_valid = false; // Mark as needing validation
+        this.entry_points_dirty = true; // Invalidate entry points cache
     }
 
     @Override
@@ -121,6 +130,7 @@ public class BlueprintGraph implements IBlueprintGraph {
 
         this.connections.remove(connection);
         this.is_valid = false; // Mark as needing validation
+        this.entry_points_dirty = true; // Invalidate entry points cache
     }
 
     @Override
@@ -130,8 +140,13 @@ public class BlueprintGraph implements IBlueprintGraph {
 
     @Override
     public List<IBlueprintNode> getEntryPoints() {
+        // Return cached entry points if available
+        if (!this.entry_points_dirty && this.cached_entry_points != null) {
+            return this.cached_entry_points;
+        }
+        
         // Entry points are nodes with no incoming EXECUTION_FLOW connections
-        return this.nodes.stream()
+        this.cached_entry_points = this.nodes.stream()
             .filter(node -> {
                 // Get all execution input pins for this node using utility method
                 final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
@@ -153,6 +168,9 @@ public class BlueprintGraph implements IBlueprintGraph {
                 return true; // Has execution input(s) but none are connected
             })
             .toList();
+        
+        this.entry_points_dirty = false;
+        return this.cached_entry_points;
     }
 
     @Override
@@ -186,6 +204,8 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.connections.clear();
         this.nodes.clear();
         this.is_valid = true; // Empty graph is valid
+        this.cached_entry_points = List.of();
+        this.entry_points_dirty = false;
     }
 
     @Override
