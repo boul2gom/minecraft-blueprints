@@ -7,7 +7,11 @@
       "WebFetch(domain:dev.epicgames.com)",
       "Bash(./gradlew build:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(chmod:*)",
+      "Bash(./fix_naming.sh)",
+      "Bash(./fix_minecraft_overrides.sh)",
+      "Bash(find src/client -name \"MinecraftBlueprintsClient.java\" -exec bash -c 'sed -i \"\"\"\" \"\"s/on_initialize_client/onInitializeClient/g\"\" \"\"$1\"\"' _ {} ;)"
     ],
     "deny": [],
     "ask": []

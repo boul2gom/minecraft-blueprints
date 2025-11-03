@@ -52,7 +52,7 @@ public class BlueprintConnection implements IBlueprintConnection {
 
     @Override
     public boolean isValid() {
-        return this.output.canConnectTo(this.input);
+        return this.output.can_connect_to(this.input);
     }
 
     @Override

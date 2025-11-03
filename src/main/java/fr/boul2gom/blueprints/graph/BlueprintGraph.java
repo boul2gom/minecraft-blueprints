@@ -67,7 +67,7 @@ public class BlueprintGraph implements IBlueprintGraph {
                                  connection.getOutput().getNode().equals(node))
             .collect(Collectors.toSet());
 
-        connections_to_remove.forEach(this::removeConnection);
+        connections_to_remove.forEach(this::remove_connection);
 
         // Remove the node
         this.nodes.remove(node);
@@ -91,7 +91,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     }
 
     @Override
-    public void addConnection(IBlueprintConnection connection) {
+    public void add_connection(IBlueprintConnection connection) {
         Objects.requireNonNull(connection, "Connection may not be null");
 
         // Verify both nodes are in the graph
@@ -111,13 +111,13 @@ public class BlueprintGraph implements IBlueprintGraph {
     }
 
     @Override
-    public void removeConnection(IBlueprintConnection connection) {
+    public void remove_connection(IBlueprintConnection connection) {
         Objects.requireNonNull(connection, "Connection may not be null");
 
         // Disconnect the pins
         final IBlueprintPin input = connection.getInput();
         final IBlueprintPin output = connection.getOutput();
-        input.disconnectFrom(output);
+        input.disconnect_from(output);
 
         this.connections.remove(connection);
         this.is_valid = false; // Mark as needing validation
@@ -129,7 +129,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     }
 
     @Override
-    public List<IBlueprintNode> getEntryPoints() {
+    public List<IBlueprintNode> get_entry_points() {
         // Entry points are nodes with no incoming EXECUTION_FLOW connections
         return this.nodes.stream()
             .filter(node -> {
@@ -180,7 +180,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         for (final IBlueprintConnection connection : this.connections) {
             final IBlueprintPin input = connection.getInput();
             final IBlueprintPin output = connection.getOutput();
-            input.disconnectFrom(output);
+            input.disconnect_from(output);
         }
 
         this.connections.clear();

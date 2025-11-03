@@ -18,13 +18,13 @@ public class VariableRegistry implements IVariableRegistry {
 
     @Override
     @Nullable
-    public Object get(final String key) {
+    public Object get(String key) {
         Objects.requireNonNull(key, "Variable key cannot be null");
         return this.variables.get(key);
     }
 
     @Override
-    public <T> Optional<T> get(final String key, final Class<T> type) {
+    public <T> Optional<T> get(String key, Class<T> type) {
         Objects.requireNonNull(key, "Variable key cannot be null");
         Objects.requireNonNull(type, "Type cannot be null");
 
@@ -41,20 +41,20 @@ public class VariableRegistry implements IVariableRegistry {
     }
 
     @Override
-    public void set(final String key, final Object value) {
+    public void set(String key, Object value) {
         Objects.requireNonNull(key, "Variable key cannot be null");
         this.variables.put(key, value);
     }
 
     @Override
-    public boolean has(final String key) {
+    public boolean has(String key) {
         Objects.requireNonNull(key, "Variable key cannot be null");
         return this.variables.containsKey(key);
     }
 
     @Override
     @Nullable
-    public Object remove(final String key) {
+    public Object remove(String key) {
         Objects.requireNonNull(key, "Variable key cannot be null");
         return this.variables.remove(key);
     }

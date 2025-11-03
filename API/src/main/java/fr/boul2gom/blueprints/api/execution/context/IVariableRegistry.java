@@ -25,7 +25,7 @@ public interface IVariableRegistry {
      * @return the variable value, or null if not found
      */
     @Nullable
-    Object get(final String key);
+    Object get(String key);
 
     /**
      * Retrieves the value of a variable with type casting.
@@ -35,7 +35,7 @@ public interface IVariableRegistry {
      * @param <T> the type parameter
      * @return an Optional containing the typed value, or empty if not found or wrong type
      */
-    <T> Optional<T> get(final String key, final Class<T> type);
+    <T> Optional<T> get(String key, Class<T> type);
 
     /**
      * Sets the value of a variable.
@@ -43,7 +43,7 @@ public interface IVariableRegistry {
      * @param key the variable key
      * @param value the variable value
      */
-    void set(final String key, final Object value);
+    void set(String key, Object value);
 
     /**
      * Checks if a variable exists in the registry.
@@ -51,7 +51,7 @@ public interface IVariableRegistry {
      * @param key the variable key
      * @return true if the variable exists, false otherwise
      */
-    boolean has(final String key);
+    boolean has(String key);
 
     /**
      * Removes a variable from the registry.
@@ -60,7 +60,7 @@ public interface IVariableRegistry {
      * @return the removed value, or null if not found
      */
     @Nullable
-    Object remove(final String key);
+    Object remove(String key);
 
     /**
      * Clears all variables from the registry.

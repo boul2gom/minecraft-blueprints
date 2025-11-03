@@ -77,7 +77,7 @@ public class BlueprintPin implements IBlueprintPin {
     }
 
     @Override
-    public boolean canConnectTo(IBlueprintPin pin) {
+    public boolean can_connect_to(IBlueprintPin pin) {
         Objects.requireNonNull(pin, "Pin may not be null");
 
         // Cannot connect to itself
@@ -117,11 +117,11 @@ public class BlueprintPin implements IBlueprintPin {
     }
 
     @Override
-    public void connectTo(IBlueprintPin pin) {
+    public void connect_to(IBlueprintPin pin) {
         Objects.requireNonNull(pin, "Pin may not be null");
 
         // Validate connection before creating it
-        if (!this.canConnectTo(pin)) {
+        if (!this.can_connect_to(pin)) {
             throw new IllegalArgumentException(
                 "Cannot connect '" + this.getDisplay() + "' to '" + pin.getDisplay() + "' " +
                 "(incompatible types, directions, or connection limit reached)"
@@ -167,7 +167,7 @@ public class BlueprintPin implements IBlueprintPin {
     }
 
     @Override
-    public void disconnectFrom(IBlueprintPin pin) {
+    public void disconnect_from(IBlueprintPin pin) {
         Objects.requireNonNull(pin, "Pin may not be null");
 
         // Find the connection between this pin and the target pin

@@ -79,13 +79,13 @@ public interface IBlueprintPin {
      * @param pin the pin to check connection to.
      * @return true if the pin can connect to the specified pin, false otherwise.
      */
-    boolean canConnectTo(IBlueprintPin pin);
+    boolean can_connect_to(IBlueprintPin pin);
 
     /**
      * Connect the pin to another pin.
      * @param pin the pin to connect to.
      */
-    void connectTo(IBlueprintPin pin);
+    void connect_to(IBlueprintPin pin);
 
     /**
      * Disconnect the pin from any other pin.
@@ -96,7 +96,7 @@ public interface IBlueprintPin {
      * Disconnect the pin from another pin.
      * @param pin the pin to disconnect from.
      */
-    void disconnectFrom(IBlueprintPin pin);
+    void disconnect_from(IBlueprintPin pin);
 
     /**
      * Get all connections associated with the pin.

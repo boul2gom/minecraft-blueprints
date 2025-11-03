@@ -34,7 +34,7 @@ public interface IExecutionLogger {
      *
      * @param enabled whether to enable logging
      */
-    void setEnabled(final boolean enabled);
+    void setEnabled(boolean enabled);
 
     /**
      * Records the start of a node execution.
@@ -44,7 +44,7 @@ public interface IExecutionLogger {
      * @param variablesBefore snapshot of variables before execution
      * @return the start instant, to be passed to logNodeEnd
      */
-    Instant logStart(final IBlueprintNode node, final Map<String, Object> variablesBefore);
+    Instant log_start(IBlueprintNode node, Map<String, Object> variablesBefore);
 
     /**
      * Records the end of a node execution.
@@ -56,12 +56,12 @@ public interface IExecutionLogger {
      * @param success whether execution was successful
      * @param error error message if execution failed, null otherwise
      */
-    void logEnd(
-            final IBlueprintNode node,
-            final Instant startTime,
-            final Map<String, Object> variablesAfter,
-            final boolean success,
-            final String error
+    void log_end(
+            IBlueprintNode node,
+            Instant startTime,
+            Map<String, Object> variablesAfter,
+            boolean success,
+            String error
     );
 
     /**
@@ -76,14 +76,14 @@ public interface IExecutionLogger {
      *
      * @return the step count
      */
-    int getStepCount();
+    int get_step_count();
 
     /**
      * Returns the total execution time across all recorded steps.
      *
      * @return the cumulative execution time
      */
-    Duration getTotalExecutionTime();
+    Duration get_total_execution_time();
 
     /**
      * Returns statistics about execution time per node type.
@@ -91,7 +91,7 @@ public interface IExecutionLogger {
      *
      * @return map of node IDs to total execution time
      */
-    Map<String, Duration> getExecutionTimeByNode();
+    Map<String, Duration> get_execution_time_by_node();
 
     /**
      * Returns the slowest nodes by execution time.
@@ -99,7 +99,7 @@ public interface IExecutionLogger {
      * @param limit maximum number of nodes to return
      * @return list of node IDs sorted by execution time (slowest first)
      */
-    List<String> getSlowestNodes(final int limit);
+    List<String> get_slowest_nodes(int limit);
 
     /**
      * Clears all recorded execution steps.
@@ -119,7 +119,7 @@ public interface IExecutionLogger {
      *
      * @return list of failed execution steps
      */
-    List<IExecutionStep> getFailedSteps();
+    List<IExecutionStep> get_failed_steps();
 
     /**
      * Logs a summary of the execution to the console.

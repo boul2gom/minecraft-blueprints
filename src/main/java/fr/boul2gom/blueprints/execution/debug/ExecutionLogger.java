@@ -42,7 +42,7 @@ public class ExecutionLogger implements IExecutionLogger {
     }
 
     @Override
-    public Instant logStart(IBlueprintNode node, Map<String, Object> variablesBefore) {
+    public Instant log_start(IBlueprintNode node, Map<String, Object> variablesBefore) {
         if (!this.enabled) {
             return Instant.now();
         }
@@ -61,7 +61,7 @@ public class ExecutionLogger implements IExecutionLogger {
     }
 
     @Override
-    public void logEnd(
+    public void log_end(
             IBlueprintNode node,
             Instant startTime,
             Map<String, Object> variablesAfter,
@@ -81,7 +81,7 @@ public class ExecutionLogger implements IExecutionLogger {
 
         final Map<String, Object> variablesBefore = this.steps.isEmpty()
                 ? Collections.emptyMap()
-                : this.steps.getLast().getVariablesAfter();
+                : this.steps.getLast().variables_after();
 
         final ExecutionStep step = new ExecutionStep(
                 this.index++,
@@ -109,7 +109,7 @@ public class ExecutionLogger implements IExecutionLogger {
                     node.getName(),
                     node.getId(),
                     executionTime.toMillis(),
-                    step.getIndex(),
+                    step.index(),
                     variablesAfter.isEmpty() ? "none" : variablesAfter.size() + " variable(s)"
             );
         } else {
@@ -118,7 +118,7 @@ public class ExecutionLogger implements IExecutionLogger {
                     node.getName(),
                     node.getId(),
                     executionTime.toMillis(),
-                    step.getIndex(),
+                    step.index(),
                     error
             );
         }
@@ -130,24 +130,24 @@ public class ExecutionLogger implements IExecutionLogger {
     }
 
     @Override
-    public int getStepCount() {
+    public int get_step_count() {
         return this.steps.size();
     }
 
     @Override
-    public Duration getTotalExecutionTime() {
+    public Duration get_total_execution_time() {
         return this.steps.stream()
-                .map(IExecutionStep::getExecutionTime)
+                .map(IExecutionStep::execution_time)
                 .reduce(Duration.ZERO, Duration::plus);
     }
 
     @Override
-    public Map<String, Duration> getExecutionTimeByNode() {
+    public Map<String, Duration> get_execution_time_by_node() {
         return Collections.unmodifiableMap(this.execution_time);
     }
 
     @Override
-    public List<String> getSlowestNodes(int limit) {
+    public List<String> get_slowest_nodes(int limit) {
         if (limit <= 0) {
             throw new IllegalArgumentException("Limit must be positive");
         }
@@ -169,13 +169,13 @@ public class ExecutionLogger implements IExecutionLogger {
     @Override
     public boolean hasErrors() {
         return this.steps.stream()
-                .anyMatch(step -> !step.isSuccess());
+                .anyMatch(step -> !step.success());
     }
 
     @Override
-    public List<IExecutionStep> getFailedSteps() {
+    public List<IExecutionStep> get_failed_steps() {
         return this.steps.stream()
-                .filter(step -> !step.isSuccess())
+                .filter(step -> !step.success())
                 .collect(Collectors.toList());
     }
 
@@ -188,18 +188,18 @@ public class ExecutionLogger implements IExecutionLogger {
         MinecraftBlueprints.LOGGER.info("=".repeat(60));
         MinecraftBlueprints.LOGGER.info("[Blueprint Execution Summary]");
         MinecraftBlueprints.LOGGER.info("=".repeat(60));
-        MinecraftBlueprints.LOGGER.info("Total steps executed: {}", this.getStepCount());
-        MinecraftBlueprints.LOGGER.info("Total execution time: {}ms", this.getTotalExecutionTime().toMillis());
+        MinecraftBlueprints.LOGGER.info("Total steps executed: {}", this.get_step_count());
+        MinecraftBlueprints.LOGGER.info("Total execution time: {}ms", this.get_total_execution_time().toMillis());
         MinecraftBlueprints.LOGGER.info("Success rate: {}/{} ({} errors)",
-                this.steps.size() - this.getFailedSteps().size(),
+                this.steps.size() - this.get_failed_steps().size(),
                 this.steps.size(),
-                this.getFailedSteps().size()
+                this.get_failed_steps().size()
         );
 
         if (!this.execution_time.isEmpty()) {
             MinecraftBlueprints.LOGGER.info("");
             MinecraftBlueprints.LOGGER.info("Top 3 slowest nodes:");
-            final List<String> slowest = this.getSlowestNodes(Math.min(3, this.execution_time.size()));
+            final List<String> slowest = this.get_slowest_nodes(Math.min(3, this.execution_time.size()));
             for (int i = 0; i < slowest.size(); i++) {
                 final String nodeId = slowest.get(i);
                 final Duration time = this.execution_time.get(nodeId);
@@ -210,11 +210,11 @@ public class ExecutionLogger implements IExecutionLogger {
         if (this.hasErrors()) {
             MinecraftBlueprints.LOGGER.info("");
             MinecraftBlueprints.LOGGER.error("Failed steps:");
-            for (final IExecutionStep failedStep : this.getFailedSteps()) {
+            for (final IExecutionStep failed_step : this.get_failed_steps()) {
                 MinecraftBlueprints.LOGGER.error("  - Step #{}: {} - {}",
-                        failedStep.getIndex(),
-                        failedStep.getNodeName(),
-                        failedStep.getError()
+                        failed_step.index(),
+                        failed_step.node_name(),
+                        failed_step.error()
                 );
             }
         }

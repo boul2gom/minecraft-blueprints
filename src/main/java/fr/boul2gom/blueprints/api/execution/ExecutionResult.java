@@ -31,7 +31,7 @@ public record ExecutionResult(Type type, String error, Duration execution_time, 
         return new ExecutionResult(Type.TIMEOUT, "Execution exceeded time limit", execution_time, nodes_executed);
     }
 
-    public static ExecutionResult nodeLimitExceeded(Duration execution_time, int nodes_executed) {
+    public static ExecutionResult node_limit_exceeded(Duration execution_time, int nodes_executed) {
         return new ExecutionResult(Type.NODE_LIMIT_EXCEEDED, "Execution exceeded node limit", execution_time, nodes_executed);
     }
 

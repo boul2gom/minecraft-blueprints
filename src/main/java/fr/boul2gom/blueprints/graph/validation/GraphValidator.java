@@ -54,7 +54,7 @@ public class GraphValidator {
         }
 
         // 4. Check if graph has entry points
-        if (this.graph.getEntryPoints().isEmpty()) {
+        if (this.graph.get_entry_points().isEmpty()) {
             throw new ValidationException("Graph has no entry points (nodes with unconnected execution inputs)");
         }
     }

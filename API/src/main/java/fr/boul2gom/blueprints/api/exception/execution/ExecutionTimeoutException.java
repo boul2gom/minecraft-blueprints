@@ -28,7 +28,7 @@ public class ExecutionTimeoutException extends ExecutionException {
      * Gets the actual execution time in milliseconds.
      * @return the actual execution time in milliseconds.
      */
-    public long getExecutionTime() {
+    public long get_execution_time() {
         return this.execution_time;
     }
 
@@ -36,7 +36,7 @@ public class ExecutionTimeoutException extends ExecutionException {
      * Gets the maximum allowed execution time in milliseconds.
      * @return the maximum allowed execution time in milliseconds.
      */
-    public long getMaxTime() {
+    public long get_max_time() {
         return this.max_time;
     }
 }

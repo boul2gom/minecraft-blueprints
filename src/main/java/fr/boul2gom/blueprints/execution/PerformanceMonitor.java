@@ -28,15 +28,15 @@ public record PerformanceMonitor(Duration max_execution_time, int max_nodes_per_
         Objects.requireNonNull(context, "Execution context may not be null");
 
         // Check execution time
-        final Duration elapsed_time = Duration.between(context.getStartTime(), Instant.now());
+        final Duration elapsed_time = Duration.between(context.get_start_time(), Instant.now());
         if (elapsed_time.compareTo(this.max_execution_time) > 0) {
             throw new ExecutionTimeoutException(elapsed_time.toMillis(), this.max_execution_time.toMillis());
         }
 
         // Check node limit
-        if (context.getNodesExecuted() >= this.max_nodes_per_execution) {
+        if (context.get_nodes_executed() >= this.max_nodes_per_execution) {
             throw new NodeLimitExceededException(
-                    context.getNodesExecuted(),
+                    context.get_nodes_executed(),
                     this.max_nodes_per_execution
             );
         }

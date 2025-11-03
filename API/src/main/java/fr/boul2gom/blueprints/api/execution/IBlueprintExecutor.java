@@ -17,6 +17,7 @@ import java.time.Duration;
  * Constants:
  * - MAX_EXECUTION_TIME: The maximum allowed time for execution (default: 50ms).
  * - MAX_NODES_PER_EXECUTION: The maximum number of nodes that can be executed in a single graph run (default: 10,000).
+ * - MAX_ITERATIONS_PER_LOOP: The maximum number of iterations per loop node (default: 10,000).
  *
  * Primary Responsibilities:
  * - Executing blueprint graphs with a given execution context.
@@ -29,6 +30,8 @@ public interface IBlueprintExecutor {
     Duration MAX_EXECUTION_TIME = Duration.ofMillis(50);
     /** Maximum number of nodes that can be processed during execution */
     int MAX_NODES_PER_EXECUTION = 10000;
+    /** Maximum number of iterations per loop node */
+    int MAX_ITERATIONS_PER_LOOP = 10000;
 
     /**
      * Executes the given blueprint graph within the context of the provided execution environment.

@@ -55,13 +55,13 @@ public interface IBlueprintGraph {
      * Add a connection to the graph.
      * @param connection the connection to add.
      */
-    void addConnection(IBlueprintConnection connection);
+    void add_connection(IBlueprintConnection connection);
 
     /**
      * Remove a connection from the graph.
      * @param connection the connection to remove.
      */
-    void removeConnection(IBlueprintConnection connection);
+    void remove_connection(IBlueprintConnection connection);
 
     /**
      * Get all connections in the graph.
@@ -73,7 +73,7 @@ public interface IBlueprintGraph {
      * Get the entry points of the graph (nodes with no incoming execution flow connections).
      * @return a list of entry points.
      */
-    List<IBlueprintNode> getEntryPoints();
+    List<IBlueprintNode> get_entry_points();
 
     /**
      * Validate the graph (check for cycles, disconnected pins, etc.)

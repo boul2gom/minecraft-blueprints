@@ -24,56 +24,56 @@ public interface IExecutionStep {
      *
      * @return the step index
      */
-    int getIndex();
+    int index();
 
     /**
      * Returns the ID of the node that was executed.
      *
      * @return the node ID
      */
-    String getNodeId();
+    String node_id();
 
     /**
      * Returns the name of the node that was executed.
      *
      * @return the node name
      */
-    String getNodeName();
+    String node_name();
 
     /**
      * Returns the instant when this node started executing.
      *
      * @return the start instant
      */
-    Instant getStartTime();
+    Instant start_time();
 
     /**
      * Returns how long this node took to execute.
      *
      * @return the execution duration
      */
-    Duration getExecutionTime();
+    Duration execution_time();
 
     /**
      * Returns an immutable snapshot of all variables before this node executed.
      *
      * @return map of variable names to values
      */
-    Map<String, Object> getVariablesBefore();
+    Map<String, Object> variables_before();
 
     /**
      * Returns an immutable snapshot of all variables after this node executed.
      *
      * @return map of variable names to values
      */
-    Map<String, Object> getVariablesAfter();
+    Map<String, Object> variables_after();
 
     /**
      * Returns whether this node executed successfully.
      *
      * @return true if successful, false if an error occurred
      */
-    boolean isSuccess();
+    boolean success();
 
     /**
      * Returns the error message if execution failed.
@@ -81,5 +81,5 @@ public interface IExecutionStep {
      * @return the error message, or null if successful
      */
     @Nullable
-    String getError();
+    String error();
 }

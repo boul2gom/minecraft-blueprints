@@ -1,4 +1,4 @@
-package fr.boul2gom.blueprints.nodes;
+package fr.boul2gom.blueprints.nodes.action;
 
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.*;
@@ -6,6 +6,9 @@ import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.node.NodePosition;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinType;
+
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class PrintNode extends BlueprintNode {
 
@@ -36,11 +39,10 @@ public class PrintNode extends BlueprintNode {
     }
 
     @Override
-    public void execute(IExecutionContext context) {
-        // Get the message value from the connected pin
-        // For now, we'll get it from the execution context variables
-        // In future, we'll implement proper data flow resolution
-        final Object message_value = context.getVariables().get("message");
+    public CompletableFuture<Set<String>> execute(IExecutionContext context) {
+        // Get the message value from the connected pin using data flow resolution
+        final IBlueprintPin message_pin = this.getInput("message");
+        final Object message_value = context.get_pin_value(message_pin);
 
         // Print the message
         if (message_value != null) {
@@ -48,5 +50,8 @@ public class PrintNode extends BlueprintNode {
         } else {
             System.out.println("[Blueprint Print] (null)");
         }
+
+        // Continue execution
+        return CompletableFuture.completedFuture(Set.of("then"));
     }
 }

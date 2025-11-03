@@ -5,6 +5,8 @@ import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The IBlueprintNode interface represents a node within a blueprint system.
@@ -65,9 +67,15 @@ public interface IBlueprintNode {
 
     /**
      * Execute the node logic within the given execution context.
-     * @param context the execution context.
+     *
+     * @param context the execution context
+     * @return a CompletableFuture that resolves to a Set of active output execution pin IDs.
+     *         - For synchronous nodes: return CompletableFuture.completedFuture(Set.of("pin_id"))
+     *         - For async nodes: return a future that completes later
+     *         - Empty set or null: follow all execution output pins (backward compatibility)
+     *         - Non-execution pins are not included in the returned set
      */
-    void execute(IExecutionContext context);
+    CompletableFuture<Set<String>> execute(IExecutionContext context);
 
     /**
      * Get the spatial position of the node within the blueprint.

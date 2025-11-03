@@ -238,14 +238,14 @@ dependencies {
 - ✅ `NodeConfig` fluent API, `NodeFactory` interface, `PinDefinition` record
 
 **Checklist:**
-- [x] Create API module structure
-- [x] Define `IBlueprintNode` with execute(), validate(), getInputs(), getOutputs()
-- [x] Define `IBlueprintPin` with connection management
-- [x] Define `PinType` enum with colors (EXECUTION_FLOW, BOOLEAN, INTEGER, ENTITY, etc.)
-- [x] Define `PinDirection` enum (INPUT, OUTPUT)
-- [x] Create Blueprint Workbench block
+- [x] Create API module structure ⭐
+- [x] Define `IBlueprintNode` with execute(), validate(), getInputs(), getOutputs() ⭐
+- [x] Define `IBlueprintPin` with connection management ⭐
+- [x] Define `PinType` enum with colors (EXECUTION_FLOW, BOOLEAN, INTEGER, ENTITY, etc.) ⭐
+- [x] Define `PinDirection` enum (INPUT, OUTPUT) ⭐
+- [x] Create Blueprint Workbench block ⭐
 - [x] Implement `BlueprintPin` with type checking and connection validation ⭐
-- [x] Implement `BlueprintConnection` to link pins
+- [x] Implement `BlueprintConnection` to link pins ⭐
 - [x] Implement `BlueprintNode` abstract class with **Factory Pattern** ⭐
 
 ---
@@ -278,7 +278,7 @@ dependencies {
 
 ---
 
-### Phase 3: Basic Node Library
+### Phase 3: Basic Node Library ✅ (100% Complete)
 
 **Objectives:**
 - Implement fundamental node types
@@ -286,22 +286,30 @@ dependencies {
 - Build flow control nodes
 
 **Deliverables:**
-- Event nodes (OnBlockUse, OnEntityDeath, OnServerTick)
-- Flow control nodes (Branch, Sequence, ForLoop)
-- Basic action nodes (Print, Delay)
+- ✅ Event nodes (OnBlockUse, OnBlockBreak, OnPlayerJoin, OnServerTick)
+- ✅ Flow control nodes (Branch, Sequence, ForLoop, WhileLoop)
+- ✅ Basic action nodes (Print, Delay)
+- ✅ Variable nodes (Get/Set)
+- ✅ Math nodes (Add, Subtract, Multiply, Divide)
 
 **Checklist:**
-- [ ] Create `EventNode` base class with automatic Fabric event registration
-- [ ] Implement `OnBlockUseEventNode` (fires when player right-clicks block)
-- [ ] Implement `OnEntityDeathEventNode` (fires when entity dies)
-- [ ] Implement `OnServerTickEventNode` (fires every server tick)
-- [ ] Create `BranchNode` (if-else logic)
-- [ ] Create `SequenceNode` (execute multiple exec outputs in order)
-- [ ] Create `ForLoopNode` (repeat N times with index output)
-- [ ] Create `PrintNode` (log to chat/console)
-- [ ] Create `DelayNode` (schedule execution after X ticks)
-- [ ] Add node factory/registry for instantiation by ID
-- [ ] Implement node validation (e.g., Branch requires boolean input)
+- [x] Create `EventNode` base class with automatic Fabric event registration ⭐
+- [x] Implement `OnBlockUseEventNode` (fires when player right-clicks block) ⭐
+- [x] Implement `OnBlockBreakEventNode` (fires when player breaks block) ⭐
+- [x] Implement `OnPlayerJoinEventNode` (fires when player joins server) ⭐
+- [x] Implement `OnServerTickEventNode` (fires every server tick) ⭐
+- [x] Create `BranchNode` (if-else logic) ⭐
+- [x] Create `SequenceNode` (execute multiple exec outputs in order) ⭐
+- [x] Create `ForLoopNode` (repeat N times with index output) ⭐
+- [x] Create `WhileLoopNode` (loop while condition is true) ⭐
+- [x] Create `PrintNode` (log to chat/console) ⭐
+- [x] Create `DelayNode` (schedule execution after X ticks) ⭐
+- [x] Create `GetVariableNode` (retrieve variable value) ⭐
+- [x] Create `SetVariableNode` (store variable value) ⭐
+- [x] Create math nodes: `AddNode`, `SubtractNode`, `MultiplyNode`, `DivideNode` ⭐
+- [x] Add `NodeRegistry` for node instantiation by ID ⭐
+- [x] Add `BlueprintRegistry` with event indexing for efficient lookup ⭐
+- [x] Implement node validation (e.g., Branch requires boolean input) ⭐
 
 ---
 

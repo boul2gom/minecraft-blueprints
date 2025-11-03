@@ -9,10 +9,8 @@ import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinDirection;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class BlueprintNode implements IBlueprintNode {
 
@@ -101,7 +99,7 @@ public abstract class BlueprintNode implements IBlueprintNode {
     public abstract void validate();
 
     @Override
-    public abstract void execute(IExecutionContext context);
+    public abstract CompletableFuture<Set<String>> execute(IExecutionContext context);
 
     @Override
     public NodePosition getPosition() {

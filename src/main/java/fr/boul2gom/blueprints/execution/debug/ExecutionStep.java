@@ -13,77 +13,31 @@ import java.util.Objects;
 
 public record ExecutionStep(
         int index,
-        String nodeId,
-        String nodeName,
-        Instant startTime,
-        Duration executionTime,
-        Map<String, Object> variablesBefore,
-        Map<String, Object> variablesAfter,
+        String node_id,
+        String node_name,
+        Instant start_time,
+        Duration execution_time,
+        Map<String, Object> variables_before,
+        Map<String, Object> variables_after,
         boolean success,
         @Nullable String error
 ) implements IExecutionStep {
 
     public ExecutionStep {
-        Objects.requireNonNull(nodeId, "Node ID may not be null");
-        Objects.requireNonNull(nodeName, "Node name may not be null");
-        Objects.requireNonNull(startTime, "Start time may not be null");
-        Objects.requireNonNull(executionTime, "Execution time may not be null");
-        Objects.requireNonNull(variablesBefore, "Variables before may not be null");
-        Objects.requireNonNull(variablesAfter, "Variables after may not be null");
+        Objects.requireNonNull(node_id, "Node ID may not be null");
+        Objects.requireNonNull(node_name, "Node name may not be null");
+        Objects.requireNonNull(start_time, "Start time may not be null");
+        Objects.requireNonNull(execution_time, "Execution time may not be null");
+        Objects.requireNonNull(variables_before, "Variables before may not be null");
+        Objects.requireNonNull(variables_after, "Variables after may not be null");
 
         if (index < 0) {
             throw new IllegalArgumentException("Step index must be non-negative");
         }
 
         // Variables immuables
-        variablesBefore = Collections.unmodifiableMap(variablesBefore);
-        variablesAfter = Collections.unmodifiableMap(variablesAfter);
-    }
-
-    @Override
-    public int getIndex() {
-        return this.index;
-    }
-
-    @Override
-    public String getNodeId() {
-        return this.nodeId;
-    }
-
-    @Override
-    public String getNodeName() {
-        return this.nodeName;
-    }
-
-    @Override
-    public Instant getStartTime() {
-        return this.startTime;
-    }
-
-    @Override
-    public Duration getExecutionTime() {
-        return this.executionTime;
-    }
-
-    @Override
-    public Map<String, Object> getVariablesBefore() {
-        return this.variablesBefore;
-    }
-
-    @Override
-    public Map<String, Object> getVariablesAfter() {
-        return this.variablesAfter;
-    }
-
-    @Override
-    public boolean isSuccess() {
-        return this.success;
-    }
-
-    @Override
-    @Nullable
-    public String getError() {
-        return this.error;
+        variables_before = Collections.unmodifiableMap(variables_before);
+        variables_after = Collections.unmodifiableMap(variables_after);
     }
 
     @Override
