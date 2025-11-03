@@ -104,18 +104,18 @@ public class BlueprintWorkbench extends Block {
         final Direction side_direction = this.rotate(direction);
 
         switch (state.get(TYPE)) {
-            case LEFT:
+            case LEFT -> {
                 world.setBlockState(pos.offset(side_direction), Blocks.AIR.getDefaultState());
                 world.setBlockState(pos.offset(side_direction).up(), Blocks.AIR.getDefaultState());
-                break;
-            case RIGHT:
+            }
+            case RIGHT -> {
                 world.setBlockState(pos.up(), Blocks.AIR.getDefaultState());
                 world.setBlockState(pos.offset(side_direction.getOpposite()), Blocks.AIR.getDefaultState());
-                break;
-            case TOOLBOX:
+            }
+            case TOOLBOX -> {
                 world.setBlockState(pos.down(), Blocks.AIR.getDefaultState());
                 world.setBlockState(pos.down().offset(side_direction.getOpposite()), Blocks.AIR.getDefaultState());
-                break;
+            }
         }
 
         super.onStateReplaced(state, world, pos, moved);

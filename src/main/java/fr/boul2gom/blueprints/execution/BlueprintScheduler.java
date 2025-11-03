@@ -62,17 +62,14 @@ public class BlueprintScheduler implements IBlueprintScheduler {
     }
 
     private void tick() {
-        final List<ScheduledTask> ready_tasks = new ArrayList<>();
+        final List<ScheduledTask> ready_tasks;
 
         synchronized (this.tasks) {
             // Decrement all task delays and collect ready tasks
-            for (final ScheduledTask task : this.tasks) {
-                task.ticks_remaining--;
-
-                if (task.ticks_remaining <= 0) {
-                    ready_tasks.add(task);
-                }
-            }
+            ready_tasks = this.tasks.stream()
+                .peek(task -> task.ticks_remaining--)
+                .filter(task -> task.ticks_remaining <= 0)
+                .toList();
 
             // Remove ready tasks from pending list
             this.tasks.removeAll(ready_tasks);

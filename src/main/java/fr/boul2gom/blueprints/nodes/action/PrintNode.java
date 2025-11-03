@@ -1,9 +1,10 @@
 package fr.boul2gom.blueprints.nodes.action;
 
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
-import fr.boul2gom.blueprints.api.node.*;
-import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
+import fr.boul2gom.blueprints.api.node.BlueprintNode;
+import fr.boul2gom.blueprints.api.node.NodeFactory;
 import fr.boul2gom.blueprints.api.node.NodePosition;
+import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinType;
 
