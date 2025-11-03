@@ -3,6 +3,7 @@ package fr.boul2gom.blueprints;
 import com.google.gson.Gson;
 import fr.boul2gom.blueprints.blocks.BlueprintWorkbench;
 import fr.boul2gom.blueprints.screens.BlueprintScreenHandler;
+import fr.boul2gom.blueprints.util.EntityUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -55,7 +56,7 @@ public class MinecraftBlueprints implements ModInitializer {
 
         LOGGER.info("Registering events...");
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, world) -> {
-            final Text entity_name = (entity.getDisplayName() != null ? entity.getDisplayName() : entity.getName());
+            final Text entity_name = EntityUtils.getDisplayName(entity);
             final Text death_message = entity.getDamageTracker().getDeathMessage();
 
             LOGGER.info("{} died from {}.", entity_name.getString(), death_message.getString());
@@ -64,8 +65,8 @@ public class MinecraftBlueprints implements ModInitializer {
         UseBlockCallback.EVENT.register((player, world, hand, hit_result) -> {
             if (world.isClient()) return ActionResult.PASS;
 
-            final Text name = (player.getDisplayName() != null ? player.getDisplayName() : player.getName());
-            final String result = new Gson().toJson(hit_result);
+            final Text name = EntityUtils.getDisplayName(player);
+            final String result = GSON.toJson(hit_result);
 
             LOGGER.info("[{}] {} used {} at {}.", hand.name(), name.getString(), result, hit_result.getBlockPos());
             return ActionResult.PASS;

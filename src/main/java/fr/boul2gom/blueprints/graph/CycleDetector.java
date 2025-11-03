@@ -5,7 +5,7 @@ import fr.boul2gom.blueprints.api.exception.CycleDetectedException;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.NodeUtils;
 
 import java.util.*;
 
@@ -44,10 +44,8 @@ public class CycleDetector {
         recursion_stack.add(node);
         current_path.add(node);
 
-        // Get all execution output pins from this node
-        final List<? extends IBlueprintPin> exec_outputs = node.getOutputs().stream()
-            .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
-            .toList();
+        // Get all execution output pins from this node using utility method
+        final List<? extends IBlueprintPin> exec_outputs = NodeUtils.getExecutionOutputs(node);
 
         // Follow each execution output connection
         for (final IBlueprintPin output_pin : exec_outputs) {

@@ -11,7 +11,7 @@ import fr.boul2gom.blueprints.api.execution.IExecutionResult;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.NodeUtils;
 
 import java.util.*;
 
@@ -32,8 +32,6 @@ public class BlueprintExecutor implements IBlueprintExecutor {
         Objects.requireNonNull(graph, "Graph may not be null");
         Objects.requireNonNull(context, "Execution context may not be null");
 
-        final long start_time = System.currentTimeMillis();
-
         try {
             // 1. Validate graph before execution
             graph.validate();
@@ -49,7 +47,7 @@ public class BlueprintExecutor implements IBlueprintExecutor {
             this.executeBFS(entry_points, context);
 
             // 4. Return success result
-            final long execution_time = System.currentTimeMillis() - start_time;
+            final long execution_time = System.currentTimeMillis() - context.getStartTime();
             return ExecutionResult.success(execution_time, context.getNodesExecuted());
 
         } catch (ValidationException e) {
@@ -57,18 +55,18 @@ public class BlueprintExecutor implements IBlueprintExecutor {
             return ExecutionResult.validationFailed(e.getMessage());
 
         } catch (ExecutionTimeoutException e) {
-            // Execution timeout
-            final long execution_time = System.currentTimeMillis() - start_time;
+            // Execution timeout - calculate time once
+            final long execution_time = System.currentTimeMillis() - context.getStartTime();
             return ExecutionResult.timeout(execution_time, context.getNodesExecuted());
 
         } catch (NodeLimitExceededException e) {
-            // Node limit exceeded
-            final long execution_time = System.currentTimeMillis() - start_time;
+            // Node limit exceeded - calculate time once
+            final long execution_time = System.currentTimeMillis() - context.getStartTime();
             return ExecutionResult.nodeLimitExceeded(execution_time, context.getNodesExecuted());
 
         } catch (Exception e) {
-            // Other execution error
-            final long execution_time = System.currentTimeMillis() - start_time;
+            // Other execution error - calculate time once
+            final long execution_time = System.currentTimeMillis() - context.getStartTime();
             return ExecutionResult.error(e.getMessage(), execution_time, context.getNodesExecuted());
         }
     }
@@ -127,10 +125,8 @@ public class BlueprintExecutor implements IBlueprintExecutor {
     private List<IBlueprintNode> getNextNodes(IBlueprintNode node) {
         final List<IBlueprintNode> next_nodes = new ArrayList<>();
 
-        // Get all execution output pins
-        final List<? extends IBlueprintPin> exec_outputs = node.getOutputs().stream()
-            .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
-            .toList();
+        // Get all execution output pins using utility method
+        final List<? extends IBlueprintPin> exec_outputs = NodeUtils.getExecutionOutputs(node);
 
         // Follow each execution output connection
         for (final IBlueprintPin output_pin : exec_outputs) {

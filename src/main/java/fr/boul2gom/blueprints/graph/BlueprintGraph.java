@@ -133,7 +133,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         // Entry points are nodes with no incoming EXECUTION_FLOW connections
         return this.nodes.stream()
             .filter(node -> {
-                // Get all execution input pins for this node
+                // Get all execution input pins for this node using utility method
                 final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
                     .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
                     .toList();

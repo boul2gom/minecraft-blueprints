@@ -27,18 +27,18 @@ public class PerformanceMonitor {
     public void checkLimits(IExecutionContext context) {
         Objects.requireNonNull(context, "Execution context may not be null");
 
-        // Check execution time
-        final long elapsed_time = System.currentTimeMillis() - context.getStartTime();
-        if (elapsed_time > this.max_execution_time) {
-            throw new ExecutionTimeoutException(elapsed_time, this.max_execution_time);
-        }
-
-        // Check node limit
+        // Check node limit first (cheaper operation)
         if (context.getNodesExecuted() >= this.max_nodes_per_execution) {
             throw new NodeLimitExceededException(
                 context.getNodesExecuted(),
                 this.max_nodes_per_execution
             );
+        }
+
+        // Check execution time (calculate once)
+        final long elapsed_time = System.currentTimeMillis() - context.getStartTime();
+        if (elapsed_time > this.max_execution_time) {
+            throw new ExecutionTimeoutException(elapsed_time, this.max_execution_time);
         }
     }
 
