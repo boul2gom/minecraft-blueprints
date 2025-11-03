@@ -38,6 +38,9 @@ public class BlueprintExecutor implements IBlueprintExecutor {
 
         final Instant start_time = Instant.now();
 
+        // Clear logger before execution
+        context.getLogger().clear();
+
         try {
             // 1. Validate graph before execution
             graph.validate();
@@ -51,6 +54,9 @@ public class BlueprintExecutor implements IBlueprintExecutor {
 
             // 3. Execute using BFS traversal
             this.bfs(entry_points, context);
+
+            // 4. Log execution summary
+            context.getLogger().summary();
 
             final Duration execution_time = Duration.between(start_time, Instant.now());
             return ExecutionResult.success(execution_time, context.getNodesExecuted());
@@ -93,15 +99,39 @@ public class BlueprintExecutor implements IBlueprintExecutor {
             visited.add(current_node);
             context.setCurrentNode(current_node);
 
+            // Log node execution start
+            final Instant node_start = context.getLogger().logStart(
+                    current_node,
+                    context.getVariables().snapshot()
+            );
+
             try {
                 current_node.execute(context);
                 context.incrementNodes();
+
+                // Log node execution success
+                context.getLogger().logEnd(
+                        current_node,
+                        node_start,
+                        context.getVariables().snapshot(),
+                        true,
+                        null
+                );
 
                 // Find next nodes to execute by following execution output pins
                 final List<IBlueprintNode> next_nodes = this.getNext(current_node);
                 execution_queue.addAll(next_nodes);
 
             } catch (Exception e) {
+                // Log node execution failure
+                context.getLogger().logEnd(
+                        current_node,
+                        node_start,
+                        context.getVariables().snapshot(),
+                        false,
+                        e.getMessage()
+                );
+
                 throw new ExecutionException(
                     String.format("Error executing node '%s': %s", current_node.getName(), e.getMessage()),
                     e

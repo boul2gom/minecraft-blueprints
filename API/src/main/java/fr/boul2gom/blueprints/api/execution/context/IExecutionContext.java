@@ -1,5 +1,6 @@
 package fr.boul2gom.blueprints.api.execution.context;
 
+import fr.boul2gom.blueprints.api.execution.debug.IExecutionLogger;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -13,10 +14,11 @@ import java.time.Instant;
  * It encapsulates the runtime environment, tracking mechanisms, and safety limits required for
  * safe and efficient blueprint execution.
  *
- * Responsibilities are organized into three main areas:
+ * Responsibilities are organized into four main areas:
  * 1. Variable Management - Runtime variable storage and retrieval via IVariableRegistry
  * 2. Environmental Context - Access to the Minecraft world and entity context
  * 3. Execution Tracking - Monitoring execution progress and enforcing safety limits
+ * 4. Debug Logging - Recording execution steps for debugging and profiling
  */
 public interface IExecutionContext {
 
@@ -107,4 +109,12 @@ public interface IExecutionContext {
      * @return true if execution should stop, false otherwise
      */
     boolean isStoppingNeeded();
+
+    /**
+     * Returns the execution logger for recording execution steps.
+     * Used for debugging, profiling, and analyzing blueprint execution.
+     *
+     * @return the execution logger instance
+     */
+    IExecutionLogger getLogger();
 }

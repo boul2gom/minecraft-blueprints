@@ -2,7 +2,9 @@ package fr.boul2gom.blueprints.api.execution.context;
 
 import fr.boul2gom.blueprints.MinecraftBlueprints;
 import fr.boul2gom.blueprints.api.execution.IBlueprintExecutor;
+import fr.boul2gom.blueprints.api.execution.debug.IExecutionLogger;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
+import fr.boul2gom.blueprints.execution.debug.ExecutionLogger;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +20,7 @@ import java.time.Instant;
 public class ExecutionContext implements IExecutionContext {
 
     private final IVariableRegistry variables;
+    private final IExecutionLogger logger;
     private final World world;
     private final Entity entity;
     private final Instant start_time;
@@ -32,7 +35,12 @@ public class ExecutionContext implements IExecutionContext {
     }
 
     public ExecutionContext(@Nullable final World world, @Nullable final Entity entity, Duration timeout, final int max_nodes) {
+        this(world, entity, timeout, max_nodes, true);
+    }
+
+    public ExecutionContext(@Nullable final World world, @Nullable final Entity entity, Duration timeout, final int max_nodes, boolean logging) {
         this.variables = new VariableRegistry();
+        this.logger = new ExecutionLogger(logging);
         this.start_time = Instant.now();
         this.world = world;
         this.entity = entity;
@@ -106,6 +114,11 @@ public class ExecutionContext implements IExecutionContext {
 
         // Check if node limit exceeded
         return this.nodes_executed >= this.max_nodes;
+    }
+
+    @Override
+    public IExecutionLogger getLogger() {
+        return this.logger;
     }
 
     @Override
