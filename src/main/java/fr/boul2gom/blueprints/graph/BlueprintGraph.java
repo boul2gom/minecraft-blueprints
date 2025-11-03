@@ -142,7 +142,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     @Override
     public List<IBlueprintNode> getEntryPoints() {
         // Return cached entry points if available
-        if (!this.entry_points_dirty && this.cached_entry_points != null) {
+        if (!this.entry_points_dirty) {
             return this.cached_entry_points;
         }
         
@@ -203,8 +203,8 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.connections.clear();
         this.nodes.clear();
         this.is_valid = true; // Empty graph is valid
-        this.cached_entry_points = List.of();
-        this.entry_points_dirty = false;
+        this.cached_entry_points = List.of(); // Empty graph has no entry points
+        this.entry_points_dirty = false; // Cache is now valid (empty list)
     }
 
     @Override
