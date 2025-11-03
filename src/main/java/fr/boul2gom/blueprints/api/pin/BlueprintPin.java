@@ -7,6 +7,8 @@ import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+
 public class BlueprintPin implements IBlueprintPin {
 
     private final String id;
@@ -197,7 +199,7 @@ public class BlueprintPin implements IBlueprintPin {
         // Use stream for cleaner code and potential optimization
         return this.connections.stream()
             .map(connection -> connection.getOther(this))
-            .collect(java.util.stream.Collectors.toUnmodifiableSet());
+            .collect(toUnmodifiableSet());
     }
 
     @Override

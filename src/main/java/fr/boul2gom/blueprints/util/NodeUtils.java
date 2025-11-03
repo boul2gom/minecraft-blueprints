@@ -30,4 +30,19 @@ public final class NodeUtils {
             .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
             .toList();
     }
+
+    /**
+     * Get all execution flow input pins from a node.
+     * This is used to determine entry points in the graph.
+     *
+     * @param node The node to get execution inputs from
+     * @return List of execution flow input pins
+     */
+    public static List<? extends IBlueprintPin> getExecutionInputs(IBlueprintNode node) {
+        Objects.requireNonNull(node, "Node may not be null");
+        
+        return node.getInputs().stream()
+            .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
+            .toList();
+    }
 }

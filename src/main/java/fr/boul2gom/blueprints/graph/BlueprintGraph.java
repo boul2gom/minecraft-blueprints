@@ -8,6 +8,7 @@ import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinDirection;
 import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.NodeUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -149,9 +150,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.cached_entry_points = this.nodes.stream()
             .filter(node -> {
                 // Get all execution input pins for this node using utility method
-                final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
-                    .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
-                    .toList();
+                final List<? extends IBlueprintPin> exec_inputs = NodeUtils.getExecutionInputs(node);
 
                 // If node has no execution inputs, it's not an entry point
                 if (exec_inputs.isEmpty()) {
