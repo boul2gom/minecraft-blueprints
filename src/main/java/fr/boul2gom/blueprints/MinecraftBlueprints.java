@@ -115,6 +115,7 @@ public class MinecraftBlueprints implements ModInitializer {
     private void register_events() {
         LOGGER.info("Registering events...");
         final BlueprintExecutor executor = new BlueprintExecutor();
+        int event_count = 0;
 
         // On Block Use event
         UseBlockCallback.EVENT.register((player, world, hand, hit_result) -> {
@@ -133,6 +134,7 @@ public class MinecraftBlueprints implements ModInitializer {
 
             return ActionResult.PASS;
         });
+        event_count++;
 
         // On Server Tick event
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -144,6 +146,7 @@ public class MinecraftBlueprints implements ModInitializer {
                 executeBlueprint(executor, blueprint, context);
             }
         });
+        event_count++;
 
         // On Player Join event
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -156,6 +159,7 @@ public class MinecraftBlueprints implements ModInitializer {
                 executeBlueprint(executor, blueprint, context);
             }
         });
+        event_count++;
 
         // On Block Break event
         PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> {
@@ -174,8 +178,9 @@ public class MinecraftBlueprints implements ModInitializer {
 
             return true;
         });
+        event_count++;
 
-        LOGGER.info("Registered {} Fabric event handlers for blueprint execution.", 4);
+        LOGGER.info("Registered {} Fabric event handlers for blueprint execution.", event_count);
     }
 
     /**

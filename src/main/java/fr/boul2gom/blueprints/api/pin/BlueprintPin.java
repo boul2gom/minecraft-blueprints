@@ -6,6 +6,7 @@ import fr.boul2gom.blueprints.api.connection.IBlueprintConnection;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BlueprintPin implements IBlueprintPin {
 
@@ -199,7 +200,7 @@ public class BlueprintPin implements IBlueprintPin {
     public Set<IBlueprintPin> getPins() {
         return this.connections.stream()
             .map(this::getPinFromConnection)
-            .collect(java.util.stream.Collectors.toUnmodifiableSet());
+            .collect(Collectors.toUnmodifiableSet());
     }
     
     /**
