@@ -1,6 +1,7 @@
 package fr.boul2gom.blueprints.api.node;
 
 import fr.boul2gom.blueprints.MinecraftBlueprints;
+import fr.boul2gom.blueprints.api.execution.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.node.utils.PinDefinition;
 import fr.boul2gom.blueprints.api.pin.BlueprintPin;
@@ -100,7 +101,7 @@ public abstract class BlueprintNode implements IBlueprintNode {
     public abstract void validate();
 
     @Override
-    public abstract void execute();
+    public abstract void execute(IExecutionContext context);
 
     @Override
     public NodePosition getPosition() {

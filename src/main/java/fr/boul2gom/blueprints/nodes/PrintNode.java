@@ -1,5 +1,6 @@
 package fr.boul2gom.blueprints.nodes;
 
+import fr.boul2gom.blueprints.api.execution.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.*;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.node.NodePosition;
@@ -35,7 +36,17 @@ public class PrintNode extends BlueprintNode {
     }
 
     @Override
-    public void execute() {
-        // TODO: Implement execution logic
+    public void execute(IExecutionContext context) {
+        // Get the message value from the connected pin
+        // For now, we'll get it from the execution context variables
+        // In future, we'll implement proper data flow resolution
+        final Object message_value = context.getVariable("message");
+
+        // Print the message
+        if (message_value != null) {
+            System.out.println("[Blueprint Print] " + message_value);
+        } else {
+            System.out.println("[Blueprint Print] (null)");
+        }
     }
 }

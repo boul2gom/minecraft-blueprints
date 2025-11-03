@@ -1,5 +1,6 @@
 package fr.boul2gom.blueprints.api.node;
 
+import fr.boul2gom.blueprints.api.execution.IExecutionContext;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,7 @@ public interface IBlueprintNode {
     @Nullable IBlueprintPin getOutput(String id);
 
     void validate();
-    void execute();
+    void execute(IExecutionContext context);
 
     NodePosition getPosition();
     void setPosition(NodePosition position);
