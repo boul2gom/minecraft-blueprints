@@ -7,45 +7,87 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents a blueprint graph in a system, consisting of nodes and connections.
+ * Provides methods for the management of nodes, their interconnections, and graph validation.
+ */
 public interface IBlueprintGraph {
 
-    // Get unique graph identifier
+    /**
+     * Get the unique identifier of the graph.
+     * @return unique identifier of the graph.
+     */
     String getId();
 
-    // Get graph display name
+    /**
+     * Get the name of the graph.
+     * @return name of the graph.
+     */
     String getName();
 
-    // Add a node to the graph
-    void addNode(IBlueprintNode node);
+    /**
+     * Add a node to the graph.
+     * @param node the node to add.
+     */
+    void add(IBlueprintNode node);
 
-    // Remove a node from the graph
-    void removeNode(IBlueprintNode node);
+    /**
+     * Remove a node from the graph.
+     * @param node the node to remove.
+     */
+    void remove(IBlueprintNode node);
 
-    // Get a node by its ID
+    /**
+     * Get a node from the graph by its unique identifier.
+     * @param id the unique identifier of the node.
+     * @return the node, or null if not found.
+     */
     @Nullable
     IBlueprintNode getNode(String id);
 
-    // Get all nodes in the graph
+    /**
+     * Get all nodes in the graph.
+     * @return a set of nodes.
+     */
     Set<IBlueprintNode> getNodes();
 
-    // Add a connection between two pins
+    /**
+     * Add a connection to the graph.
+     * @param connection the connection to add.
+     */
     void addConnection(IBlueprintConnection connection);
 
-    // Remove a connection
+    /**
+     * Remove a connection from the graph.
+     * @param connection the connection to remove.
+     */
     void removeConnection(IBlueprintConnection connection);
 
-    // Get all connections in the graph
+    /**
+     * Get all connections in the graph.
+     * @return a set of connections.
+     */
     Set<IBlueprintConnection> getConnections();
 
-    // Get entry points (nodes with no incoming execution flow connections)
+    /**
+     * Get the entry points of the graph (nodes with no incoming execution flow connections).
+     * @return a list of entry points.
+     */
     List<IBlueprintNode> getEntryPoints();
 
-    // Validate the graph (check for cycles, disconnected pins, etc.)
+    /**
+     * Validate the graph (check for cycles, disconnected pins, etc.)
+     */
     void validate();
 
-    // Check if graph is valid without throwing exception
+    /**
+     * Check if the graph is valid, without throwing an exception.
+     * @return true if the graph is valid, false otherwise.
+     */
     boolean isValid();
 
-    // Clear all nodes and connections
+    /**
+     * Clear the graph, removing all nodes and connections.
+     */
     void clear();
 }

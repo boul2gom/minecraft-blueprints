@@ -1,25 +1,21 @@
-package fr.boul2gom.blueprints.graph;
+package fr.boul2gom.blueprints.graph.validation;
 
 import fr.boul2gom.blueprints.api.connection.IBlueprintConnection;
-import fr.boul2gom.blueprints.api.exception.CycleDetectedException;
+import fr.boul2gom.blueprints.api.exception.validation.CycleDetectedException;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinType;
 
 import java.util.*;
 
-public class CycleDetector {
+public record CycleDetector(IBlueprintGraph graph) {
 
-    private final IBlueprintGraph graph;
-
-    public CycleDetector(IBlueprintGraph graph) {
+    public CycleDetector {
         Objects.requireNonNull(graph, "Graph may not be null");
-        this.graph = graph;
     }
 
     // Detect cycles in the execution flow graph using DFS
-    public void detectCycles() {
+    public void detect() {
         final Set<IBlueprintNode> visited = new HashSet<>();
         final Set<IBlueprintNode> recursion_stack = new HashSet<>();
         final List<IBlueprintNode> current_path = new ArrayList<>();
@@ -34,20 +30,19 @@ public class CycleDetector {
 
     // Depth-First Search to detect cycles
     private void dfs(
-        IBlueprintNode node,
-        Set<IBlueprintNode> visited,
-        Set<IBlueprintNode> recursion_stack,
-        List<IBlueprintNode> current_path
+            IBlueprintNode node,
+            Set<IBlueprintNode> visited,
+            Set<IBlueprintNode> recursion_stack,
+            List<IBlueprintNode> current_path
     ) {
-        // Mark current node as visited and add to recursion stack
         visited.add(node);
         recursion_stack.add(node);
         current_path.add(node);
 
         // Get all execution output pins from this node
         final List<? extends IBlueprintPin> exec_outputs = node.getOutputs().stream()
-            .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
-            .toList();
+                .filter(IBlueprintPin::isExecution)
+                .toList();
 
         // Follow each execution output connection
         for (final IBlueprintPin output_pin : exec_outputs) {
@@ -83,6 +78,6 @@ public class CycleDetector {
 
         // Remove node from recursion stack when backtracking
         recursion_stack.remove(node);
-        current_path.remove(current_path.size() - 1);
+        current_path.removeLast();
     }
 }

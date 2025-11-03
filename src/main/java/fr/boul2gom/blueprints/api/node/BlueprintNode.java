@@ -1,7 +1,7 @@
 package fr.boul2gom.blueprints.api.node;
 
 import fr.boul2gom.blueprints.MinecraftBlueprints;
-import fr.boul2gom.blueprints.api.execution.IExecutionContext;
+import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.node.utils.PinDefinition;
 import fr.boul2gom.blueprints.api.pin.BlueprintPin;

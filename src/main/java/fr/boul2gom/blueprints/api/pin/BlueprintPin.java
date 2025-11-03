@@ -49,6 +49,11 @@ public class BlueprintPin implements IBlueprintPin {
     }
 
     @Override
+    public boolean isExecution() {
+        return this.type.isExecution();
+    }
+
+    @Override
     public PinDirection getDirection() {
         return this.direction;
     }

@@ -6,8 +6,8 @@ import fr.boul2gom.blueprints.api.exception.NodeNotFoundException;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinDirection;
 import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.graph.validation.GraphValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -46,7 +46,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     }
 
     @Override
-    public void addNode(IBlueprintNode node) {
+    public void add(IBlueprintNode node) {
         Objects.requireNonNull(node, "Node may not be null");
 
         this.nodes.add(node);
@@ -54,7 +54,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     }
 
     @Override
-    public void removeNode(IBlueprintNode node) {
+    public void remove(IBlueprintNode node) {
         Objects.requireNonNull(node, "Node may not be null");
 
         if (!this.nodes.contains(node)) {
@@ -135,7 +135,7 @@ public class BlueprintGraph implements IBlueprintGraph {
             .filter(node -> {
                 // Get all execution input pins for this node
                 final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
-                    .filter(pin -> pin.getType() == PinType.EXECUTION_FLOW)
+                    .filter(IBlueprintPin::isExecution)
                     .toList();
 
                 // If node has no execution inputs, it's not an entry point

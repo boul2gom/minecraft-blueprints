@@ -65,7 +65,7 @@ public class MinecraftBlueprints implements ModInitializer {
             if (world.isClient()) return ActionResult.PASS;
 
             final Text name = (player.getDisplayName() != null ? player.getDisplayName() : player.getName());
-            final String result = new Gson().toJson(hit_result);
+            final String result = GSON.toJson(hit_result);
 
             LOGGER.info("[{}] {} used {} at {}.", hand.name(), name.getString(), result, hit_result.getBlockPos());
             return ActionResult.PASS;

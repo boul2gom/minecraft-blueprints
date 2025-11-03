@@ -4,7 +4,10 @@
       "WebSearch",
       "WebFetch(domain:fabricmc.net)",
       "WebFetch(domain:wiki.fabricmc.net)",
-      "WebFetch(domain:dev.epicgames.com)"
+      "WebFetch(domain:dev.epicgames.com)",
+      "Bash(./gradlew build:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

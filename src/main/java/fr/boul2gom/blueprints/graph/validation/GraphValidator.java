@@ -1,6 +1,7 @@
-package fr.boul2gom.blueprints.graph;
+package fr.boul2gom.blueprints.graph.validation;
 
-import fr.boul2gom.blueprints.api.exception.ValidationException;
+import fr.boul2gom.blueprints.MinecraftBlueprints;
+import fr.boul2gom.blueprints.api.exception.validation.ValidationException;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 
@@ -21,7 +22,7 @@ public class GraphValidator {
     // Validate the entire graph
     public void validate() {
         // 1. Check for cycles in execution flow
-        this.cycle_detector.detectCycles();
+        this.cycle_detector.detect();
 
         // 2. Validate each node individually
         for (final IBlueprintNode node : this.graph.getNodes()) {
@@ -49,7 +50,7 @@ public class GraphValidator {
         if (orphaned_count > 0) {
             // Log warning but don't fail validation
             // TODO: Add proper logging when logging system is implemented
-            System.out.println("Warning: Graph contains " + orphaned_count + " orphaned node(s)");
+            MinecraftBlueprints.LOGGER.info("Warning: Graph contains {} orphaned node(s)", orphaned_count);
         }
 
         // 4. Check if graph has entry points

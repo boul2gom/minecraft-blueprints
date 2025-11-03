@@ -1,52 +1,44 @@
 package fr.boul2gom.blueprints.execution;
 
-import fr.boul2gom.blueprints.api.exception.ExecutionTimeoutException;
-import fr.boul2gom.blueprints.api.exception.NodeLimitExceededException;
-import fr.boul2gom.blueprints.api.execution.IExecutionContext;
+import fr.boul2gom.blueprints.api.exception.execution.ExecutionTimeoutException;
+import fr.boul2gom.blueprints.api.exception.execution.NodeLimitExceededException;
+import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
-public class PerformanceMonitor {
+public record PerformanceMonitor(Duration max_execution_time, int max_nodes_per_execution) {
 
-    private final long max_execution_time;
-    private final int max_nodes_per_execution;
-
-    public PerformanceMonitor(long max_execution_time, int max_nodes_per_execution) {
-        if (max_execution_time <= 0) {
+    public PerformanceMonitor {
+        if (max_execution_time == null || max_execution_time.isZero() || max_execution_time.isNegative()) {
             throw new IllegalArgumentException("Max execution time must be positive");
         }
         if (max_nodes_per_execution <= 0) {
             throw new IllegalArgumentException("Max nodes per execution must be positive");
         }
-
-        this.max_execution_time = max_execution_time;
-        this.max_nodes_per_execution = max_nodes_per_execution;
     }
 
-    // Check if execution should stop due to timeout or node limit
-    public void checkLimits(IExecutionContext context) {
+    /**
+     * Checks the execution context against the performance limits.
+     * Throws an exception if any limit is exceeded.
+     * @param context the execution context to check.
+     */
+    public void check(IExecutionContext context) {
         Objects.requireNonNull(context, "Execution context may not be null");
 
         // Check execution time
-        final long elapsed_time = System.currentTimeMillis() - context.getStartTime();
-        if (elapsed_time > this.max_execution_time) {
-            throw new ExecutionTimeoutException(elapsed_time, this.max_execution_time);
+        final Duration elapsed_time = Duration.between(context.getStartTime(), Instant.now());
+        if (elapsed_time.compareTo(this.max_execution_time) > 0) {
+            throw new ExecutionTimeoutException(elapsed_time.toMillis(), this.max_execution_time.toMillis());
         }
 
         // Check node limit
         if (context.getNodesExecuted() >= this.max_nodes_per_execution) {
             throw new NodeLimitExceededException(
-                context.getNodesExecuted(),
-                this.max_nodes_per_execution
+                    context.getNodesExecuted(),
+                    this.max_nodes_per_execution
             );
         }
-    }
-
-    public long getMaxExecutionTime() {
-        return this.max_execution_time;
-    }
-
-    public int getMaxNodesPerExecution() {
-        return this.max_nodes_per_execution;
     }
 }
