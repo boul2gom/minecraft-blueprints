@@ -20,6 +20,10 @@ public abstract class BlueprintNode implements IBlueprintNode {
 
     private final List<IBlueprintPin> inputs;
     private final List<IBlueprintPin> outputs;
+    
+    // Cached unmodifiable views
+    private final List<IBlueprintPin> unmodifiableInputs;
+    private final List<IBlueprintPin> unmodifiableOutputs;
 
     protected BlueprintNode(NodeConfig config, NodePosition position) {
         Objects.requireNonNull(config, "Node config may not be null");
@@ -53,6 +57,10 @@ public abstract class BlueprintNode implements IBlueprintNode {
             );
             this.outputs.add(pin);
         }
+        
+        // Cache unmodifiable views
+        this.unmodifiableInputs = Collections.unmodifiableList(this.inputs);
+        this.unmodifiableOutputs = Collections.unmodifiableList(this.outputs);
     }
 
     @Override
@@ -67,12 +75,12 @@ public abstract class BlueprintNode implements IBlueprintNode {
 
     @Override
     public List<? extends IBlueprintPin> getInputs() {
-        return Collections.unmodifiableList(this.inputs);
+        return this.unmodifiableInputs;
     }
 
     @Override
     public List<? extends IBlueprintPin> getOutputs() {
-        return Collections.unmodifiableList(this.outputs);
+        return this.unmodifiableOutputs;
     }
 
     @Override @Nullable

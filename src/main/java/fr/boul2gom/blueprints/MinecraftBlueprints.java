@@ -113,6 +113,7 @@ public class MinecraftBlueprints implements ModInitializer {
     }
 
     private void register_events() {
+        LOGGER.info("Registering events...");
         final BlueprintExecutor executor = new BlueprintExecutor();
 
         // On Block Use event
@@ -122,19 +123,12 @@ public class MinecraftBlueprints implements ModInitializer {
             final List<IBlueprintGraph> blueprints = BlueprintRegistry.get_blueprints_for_event(OnBlockUseEventNode.EVENT_ID);
             for (final IBlueprintGraph blueprint : blueprints) {
                 final IExecutionContext context = new ExecutionContext(world, player);
-
-                // Set event data as pin values
-                // Note: Event nodes should set these values during their execute() method
-                // For now, we set them in variables
                 context.getVariables().set("player", player);
                 context.getVariables().set("block_pos", hit_result.getBlockPos());
                 context.getVariables().set("world", world);
                 context.getVariables().set("hand", hand.name());
 
-                final IExecutionResult result = executor.execute(blueprint, context);
-                if (!result.isSuccess()) {
-                    LOGGER.error("Blueprint '{}' execution failed: {}", blueprint.getName(), result.error());
-                }
+                executeBlueprint(executor, blueprint, context);
             }
 
             return ActionResult.PASS;
@@ -147,10 +141,7 @@ public class MinecraftBlueprints implements ModInitializer {
                 final IExecutionContext context = new ExecutionContext(null, null);
                 context.getVariables().set("server", server.toString());
 
-                final IExecutionResult result = executor.execute(blueprint, context);
-                if (!result.isSuccess()) {
-                    LOGGER.error("Blueprint '{}' execution failed: {}", blueprint.getName(), result.error());
-                }
+                executeBlueprint(executor, blueprint, context);
             }
         });
 
@@ -162,10 +153,7 @@ public class MinecraftBlueprints implements ModInitializer {
                 context.getVariables().set("player", handler.getPlayer());
                 context.getVariables().set("server", server.toString());
 
-                final IExecutionResult result = executor.execute(blueprint, context);
-                if (!result.isSuccess()) {
-                    LOGGER.error("Blueprint '{}' execution failed: {}", blueprint.getName(), result.error());
-                }
+                executeBlueprint(executor, blueprint, context);
             }
         });
 
@@ -181,15 +169,23 @@ public class MinecraftBlueprints implements ModInitializer {
                 context.getVariables().set("block_state", state);
                 context.getVariables().set("world", world);
 
-                final IExecutionResult result = executor.execute(blueprint, context);
-                if (!result.isSuccess()) {
-                    LOGGER.error("Blueprint '{}' execution failed: {}", blueprint.getName(), result.error());
-                }
+                executeBlueprint(executor, blueprint, context);
             }
 
             return true;
         });
 
-        LOGGER.info("Registered {} Fabric event handlers for blueprint execution.", 5);
+        LOGGER.info("Registered {} Fabric event handlers for blueprint execution.", 4);
+    }
+
+    /**
+     * Helper method to execute a blueprint and log errors.
+     * Reduces code duplication across event handlers.
+     */
+    private void executeBlueprint(BlueprintExecutor executor, IBlueprintGraph blueprint, IExecutionContext context) {
+        final IExecutionResult result = executor.execute(blueprint, context);
+        if (!result.isSuccess()) {
+            LOGGER.error("Blueprint '{}' execution failed: {}", blueprint.getName(), result.error());
+        }
     }
 }

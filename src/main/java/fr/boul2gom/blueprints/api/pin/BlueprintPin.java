@@ -197,15 +197,16 @@ public class BlueprintPin implements IBlueprintPin {
 
     @Override
     public Set<IBlueprintPin> getPins() {
-        final Set<IBlueprintPin> pins = new HashSet<>();
-
-        for (final IBlueprintConnection connection : this.connections) {
-            // Get the other pin from this connection
-            final IBlueprintPin other_pin = connection.getOther(this);
-            pins.add(other_pin);
-        }
-
-        return Collections.unmodifiableSet(pins);
+        return this.connections.stream()
+            .map(this::getPinFromConnection)
+            .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+    
+    /**
+     * Helper method to extract the other pin from a connection.
+     */
+    private IBlueprintPin getPinFromConnection(IBlueprintConnection connection) {
+        return connection.getOther(this);
     }
 
     @Override

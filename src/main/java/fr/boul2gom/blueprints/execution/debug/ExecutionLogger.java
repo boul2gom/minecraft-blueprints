@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class ExecutionLogger implements IExecutionLogger {
 
@@ -156,7 +155,7 @@ public class ExecutionLogger implements IExecutionLogger {
                 .sorted(Map.Entry.<String, Duration>comparingByValue().reversed())
                 .limit(limit)
                 .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -176,7 +175,7 @@ public class ExecutionLogger implements IExecutionLogger {
     public List<IExecutionStep> get_failed_steps() {
         return this.steps.stream()
                 .filter(step -> !step.success())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

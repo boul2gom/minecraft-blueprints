@@ -6,12 +6,10 @@ import fr.boul2gom.blueprints.api.exception.NodeNotFoundException;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinType;
 import fr.boul2gom.blueprints.graph.validation.GraphValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BlueprintGraph implements IBlueprintGraph {
 
@@ -22,6 +20,10 @@ public class BlueprintGraph implements IBlueprintGraph {
 
     private final GraphValidator validator;
     private boolean is_valid;
+    
+    // Cached unmodifiable views
+    private Set<IBlueprintNode> cachedUnmodifiableNodes;
+    private Set<IBlueprintConnection> cachedUnmodifiableConnections;
 
     public BlueprintGraph(String id, String name) {
         Objects.requireNonNull(id, "Graph ID may not be null");
@@ -33,6 +35,10 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.connections = new HashSet<>();
         this.validator = new GraphValidator(this);
         this.is_valid = true; // Empty graph is valid
+        
+        // Initialize cached views
+        this.cachedUnmodifiableNodes = Collections.unmodifiableSet(this.nodes);
+        this.cachedUnmodifiableConnections = Collections.unmodifiableSet(this.connections);
     }
 
     @Override
@@ -51,6 +57,7 @@ public class BlueprintGraph implements IBlueprintGraph {
 
         this.nodes.add(node);
         this.is_valid = false; // Mark as needing validation
+        // No need to update cache - unmodifiable view wraps the set
     }
 
     @Override
@@ -62,12 +69,11 @@ public class BlueprintGraph implements IBlueprintGraph {
         }
 
         // Remove all connections involving this node
-        final Set<IBlueprintConnection> connections_to_remove = this.connections.stream()
+        this.connections.stream()
             .filter(connection -> connection.getInput().getNode().equals(node) ||
                                  connection.getOutput().getNode().equals(node))
-            .collect(Collectors.toSet());
-
-        connections_to_remove.forEach(this::remove_connection);
+            .toList()  // Collect to list to avoid ConcurrentModificationException
+            .forEach(this::remove_connection);
 
         // Remove the node
         this.nodes.remove(node);
@@ -87,7 +93,7 @@ public class BlueprintGraph implements IBlueprintGraph {
 
     @Override
     public Set<IBlueprintNode> getNodes() {
-        return Collections.unmodifiableSet(this.nodes);
+        return this.cachedUnmodifiableNodes;
     }
 
     @Override
@@ -125,34 +131,33 @@ public class BlueprintGraph implements IBlueprintGraph {
 
     @Override
     public Set<IBlueprintConnection> getConnections() {
-        return Collections.unmodifiableSet(this.connections);
+        return this.cachedUnmodifiableConnections;
     }
 
     @Override
     public List<IBlueprintNode> get_entry_points() {
         // Entry points are nodes with no incoming EXECUTION_FLOW connections
         return this.nodes.stream()
-            .filter(node -> {
-                // Get all execution input pins for this node
-                final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
-                    .filter(IBlueprintPin::isExecution)
-                    .toList();
-
-                // If node has no execution inputs, it's not an entry point
-                if (exec_inputs.isEmpty()) {
-                    return false;
-                }
-
-                // Check if any execution input is connected
-                for (final IBlueprintPin pin : exec_inputs) {
-                    if (pin.isConnected()) {
-                        return false; // Has incoming execution flow
-                    }
-                }
-
-                return true; // Has execution input(s) but none are connected
-            })
+            .filter(this::isEntryPoint)
             .toList();
+    }
+    
+    /**
+     * Checks if a node is an entry point (has execution inputs but none are connected).
+     */
+    private boolean isEntryPoint(IBlueprintNode node) {
+        // Get all execution input pins for this node
+        final List<? extends IBlueprintPin> exec_inputs = node.getInputs().stream()
+            .filter(IBlueprintPin::isExecution)
+            .toList();
+
+        // If node has no execution inputs, it's not an entry point
+        if (exec_inputs.isEmpty()) {
+            return false;
+        }
+
+        // Check if any execution input is connected
+        return exec_inputs.stream().noneMatch(IBlueprintPin::isConnected);
     }
 
     @Override
