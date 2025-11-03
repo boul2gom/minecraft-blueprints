@@ -38,18 +38,11 @@ public class GraphValidator {
 
         // 3. Check for orphaned nodes (nodes with no connections) - warning only
         final long orphaned_count = this.graph.getNodes().stream()
-            .filter(node -> {
-                final boolean has_input_connections = node.getInputs().stream()
-                    .anyMatch(pin -> !pin.getConnections().isEmpty());
-                final boolean has_output_connections = node.getOutputs().stream()
-                    .anyMatch(pin -> !pin.getConnections().isEmpty());
-                return !has_input_connections && !has_output_connections;
-            })
+            .filter(this::isOrphanedNode)
             .count();
 
         if (orphaned_count > 0) {
             // Log warning but don't fail validation
-            // TODO: Add proper logging when logging system is implemented
             MinecraftBlueprints.LOGGER.info("Warning: Graph contains {} orphaned node(s)", orphaned_count);
         }
 
@@ -57,5 +50,16 @@ public class GraphValidator {
         if (this.graph.get_entry_points().isEmpty()) {
             throw new ValidationException("Graph has no entry points (nodes with unconnected execution inputs)");
         }
+    }
+    
+    /**
+     * Checks if a node is orphaned (has no input or output connections).
+     */
+    private boolean isOrphanedNode(IBlueprintNode node) {
+        final boolean has_input_connections = node.getInputs().stream()
+            .anyMatch(pin -> !pin.getConnections().isEmpty());
+        final boolean has_output_connections = node.getOutputs().stream()
+            .anyMatch(pin -> !pin.getConnections().isEmpty());
+        return !has_input_connections && !has_output_connections;
     }
 }
