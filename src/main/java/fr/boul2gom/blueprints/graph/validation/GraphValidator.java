@@ -29,8 +29,9 @@ public class GraphValidator {
             try {
                 node.validate();
             } catch (IllegalStateException e) {
+                // Java 15+: Use formatted() instead of String.format()
                 throw new ValidationException(
-                    String.format("Node '%s' validation failed: %s", node.getName(), e.getMessage()),
+                    "Node '%s' validation failed: %s".formatted(node.getName(), e.getMessage()),
                     e
                 );
             }

@@ -19,7 +19,8 @@ public class ExecutionTimeoutException extends ExecutionException {
      * @param max_time the maximum allowed execution time in milliseconds.
      */
     public ExecutionTimeoutException(long execution_time, long max_time) {
-        super(String.format("Execution exceeded time limit: %dms > %dms", execution_time, max_time));
+        // Java 15+: Use formatted() instead of String.format()
+        super("Execution exceeded time limit: %dms > %dms".formatted(execution_time, max_time));
         this.execution_time = execution_time;
         this.max_time = max_time;
     }

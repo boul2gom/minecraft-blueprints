@@ -78,8 +78,9 @@ public class ExecutionLogger implements IExecutionLogger {
         final Instant endTime = Instant.now();
         final Duration executionTime = Duration.between(startTime, endTime);
 
+        // Java 9+: Use Map.of() instead of Collections.emptyMap()
         final Map<String, Object> variablesBefore = this.steps.isEmpty()
-                ? Collections.emptyMap()
+                ? Map.of()
                 : this.steps.getLast().variables_after();
 
         final ExecutionStep step = new ExecutionStep(

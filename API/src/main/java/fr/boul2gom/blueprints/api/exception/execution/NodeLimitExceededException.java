@@ -19,7 +19,8 @@ public class NodeLimitExceededException extends ExecutionException {
      * @param max_nodes the maximum allowable number of nodes.
      */
     public NodeLimitExceededException(int nodes_executed, int max_nodes) {
-        super(String.format("Execution exceeded node limit: %d > %d", nodes_executed, max_nodes));
+        // Java 15+: Use formatted() instead of String.format()
+        super("Execution exceeded node limit: %d > %d".formatted(nodes_executed, max_nodes));
         this.nodes_executed = nodes_executed;
         this.max_nodes = max_nodes;
     }

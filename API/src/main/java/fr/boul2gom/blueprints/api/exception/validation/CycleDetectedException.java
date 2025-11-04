@@ -3,6 +3,7 @@ package fr.boul2gom.blueprints.api.exception.validation;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Exception indicating that a cycle has been detected in a blueprint graph.
@@ -30,14 +31,9 @@ public class CycleDetectedException extends ValidationException {
             return "[]";
         }
 
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < cycle_path.size(); i++) {
-            builder.append(cycle_path.get(i).getName());
-            if (i < cycle_path.size() - 1) {
-                builder.append(" -> ");
-            }
-        }
-
-        return builder.toString();
+        // Use Java 8+ stream API with Collectors.joining for cleaner string concatenation
+        return cycle_path.stream()
+            .map(IBlueprintNode::getName)
+            .collect(Collectors.joining(" -> "));
     }
 }

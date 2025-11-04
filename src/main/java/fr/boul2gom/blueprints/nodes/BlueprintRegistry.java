@@ -91,7 +91,7 @@ public class BlueprintRegistry {
 
         final List<String> blueprint_ids = EVENT_TO_BLUEPRINTS.get(event_id);
         if (blueprint_ids == null || blueprint_ids.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();  // Java 9+: Use List.of() instead of Collections.emptyList()
         }
 
         // Resolve blueprint IDs to actual blueprints

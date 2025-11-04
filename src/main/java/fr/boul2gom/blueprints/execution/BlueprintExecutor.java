@@ -115,8 +115,9 @@ public class BlueprintExecutor implements IBlueprintExecutor {
     private CompletableFuture<Void> execute_node(IBlueprintNode node, IExecutionContext context) {
         // Check iteration limit (prevents infinite loops)
         if (context.hasExceededIterations(node)) {
+            // Java 15+: Use formatted() instead of String.format()
             throw new ExecutionException(
-                String.format("Max iterations exceeded for node '%s' (limit: %d)",
+                "Max iterations exceeded for node '%s' (limit: %d)".formatted(
                     node.getName(), IBlueprintExecutor.MAX_ITERATIONS_PER_LOOP)
             );
         }
@@ -164,8 +165,9 @@ public class BlueprintExecutor implements IBlueprintExecutor {
                         error.getMessage()
                 );
 
+                // Java 15+: Use formatted() instead of String.format()
                 throw new ExecutionException(
-                    String.format("Error executing node '%s': %s", node.getName(), error.getMessage()),
+                    "Error executing node '%s': %s".formatted(node.getName(), error.getMessage()),
                     error
                 );
             });
