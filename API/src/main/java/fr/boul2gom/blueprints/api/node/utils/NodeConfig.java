@@ -101,4 +101,10 @@ public class NodeConfig {
     public List<PinDefinition> getOutputs() {
         return Collections.unmodifiableList(this.outputs);
     }
+
+    @Override
+    public String toString() {
+        return String.format("NodeConfig(id=%s, name=%s, inputs=%d, outputs=%d)",
+            this.id, this.name, this.inputs.size(), this.outputs.size());
+    }
 }

@@ -42,6 +42,11 @@ public record ExecutionStep(
 
     @Override
     public @NotNull String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("ExecutionStep(index=%d, node=%s, execution_time=%dms, success=%b%s)",
+                this.index,
+                this.node_id,
+                this.execution_time.toMillis(),
+                this.success,
+                this.error != null ? ", error=" + this.error : "");
     }
 }

@@ -1,4 +1,4 @@
-package fr.boul2gom.blueprints.execution;
+package fr.boul2gom.blueprints.execution.monitoring;
 
 import fr.boul2gom.blueprints.api.exception.execution.ExecutionTimeoutException;
 import fr.boul2gom.blueprints.api.exception.execution.NodeLimitExceededException;

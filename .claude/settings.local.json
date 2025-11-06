@@ -11,7 +11,11 @@
       "Bash(chmod:*)",
       "Bash(./fix_naming.sh)",
       "Bash(./fix_minecraft_overrides.sh)",
-      "Bash(find src/client -name \"MinecraftBlueprintsClient.java\" -exec bash -c 'sed -i \"\"\"\" \"\"s/on_initialize_client/onInitializeClient/g\"\" \"\"$1\"\"' _ {} ;)"
+      "Bash(find src/client -name \"MinecraftBlueprintsClient.java\" -exec bash -c 'sed -i \"\"\"\" \"\"s/on_initialize_client/onInitializeClient/g\"\" \"\"$1\"\"' _ {} ;)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(/Users/boul2gom/Desktop/minecraft-blueprints/gradlew build --no-daemon)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

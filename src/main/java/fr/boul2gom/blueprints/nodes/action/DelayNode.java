@@ -1,5 +1,7 @@
 package fr.boul2gom.blueprints.nodes.action;
 
+import fr.boul2gom.blueprints.MinecraftBlueprints;
+import fr.boul2gom.blueprints.api.execution.IBlueprintScheduler;
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.BlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodeFactory;
@@ -10,6 +12,7 @@ import fr.boul2gom.blueprints.api.pin.PinType;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * Action node that schedules delayed execution.
@@ -55,16 +58,17 @@ public class DelayNode extends BlueprintNode {
         final Object duration_value = context.get_pin_value(duration_pin);
 
         final int duration_ticks = duration_value instanceof Number num ? num.intValue() : 20;
+        final Executor executor = MinecraftBlueprints.INSTANCE.getServer();
 
         // Schedule delayed execution using BlueprintScheduler
-        return context.getScheduler()
+        return IBlueprintScheduler.INSTANCE
             .schedule(duration_ticks, () -> {
                 // This runnable executes after the delay
                 // No action needed, just complete the future
             })
-            .thenApply(v -> {
+            .thenApplyAsync(v -> {
                 // After delay completes, activate "completed" pin
                 return Set.of("completed");
-            });
+            }, executor);
     }
 }

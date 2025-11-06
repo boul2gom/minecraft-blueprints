@@ -70,6 +70,6 @@ public class BlueprintConnection implements IBlueprintConnection {
 
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("BlueprintConnection(id=%s, output=%s, input=%s)", this.id, this.output.getId(), this.input.getId());
     }
 }

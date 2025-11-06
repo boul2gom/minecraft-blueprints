@@ -224,6 +224,6 @@ public class ExecutionLogger implements IExecutionLogger {
 
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("ExecutionLogger(enabled=%b, steps=%d)", this.enabled, this.steps.size());
     }
 }

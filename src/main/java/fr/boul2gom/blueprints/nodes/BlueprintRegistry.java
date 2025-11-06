@@ -1,16 +1,27 @@
 package fr.boul2gom.blueprints.nodes;
 
+import fr.boul2gom.blueprints.api.execution.IBlueprintScheduler;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
+import fr.boul2gom.blueprints.api.provider.ProviderRegistry;
+import fr.boul2gom.blueprints.execution.BlueprintScheduler;
 import fr.boul2gom.blueprints.nodes.event.EventNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Central registry for blueprints.
  * Stores blueprints and indexes them by event type for efficient lookup when events fire.
+ *
+ * Thread-safety: THREAD-SAFE
+ * - Uses ConcurrentHashMap for blueprint storage
+ * - Uses CopyOnWriteArrayList for event indexing (optimized for read-heavy operations)
+ * - All public methods (register/unregister/get/clear) are safe for concurrent use
+ * - Multiple threads can safely query blueprints while registrations are happening
+ * - clear() method is now public for testing and lifecycle management
  */
 public class BlueprintRegistry {
 
@@ -34,7 +45,7 @@ public class BlueprintRegistry {
             if (node instanceof EventNode event_node) {
                 final String event_id = event_node.get_event_id();
                 EVENT_TO_BLUEPRINTS
-                    .computeIfAbsent(event_id, k -> Collections.synchronizedList(new ArrayList<>()))
+                    .computeIfAbsent(event_id, k -> new CopyOnWriteArrayList<>())
                     .add(blueprint_id);
             }
         }
@@ -130,10 +141,23 @@ public class BlueprintRegistry {
     }
 
     /**
-     * Clears all registered blueprints. Used for testing.
+     * Clears all registered blueprints and cancels any pending scheduled tasks.
+     * Now public for testing and lifecycle management (e.g., server shutdown).
+     *
+     * WARNING: This will cancel all blueprints mid-execution and clear the scheduler.
+     * Only call during shutdown or when resetting the entire system.
      */
-    static void clear() {
+    public static void clear() {
         BLUEPRINTS.clear();
         EVENT_TO_BLUEPRINTS.clear();
+
+        // Cancel all scheduled tasks associated with blueprints
+        // This prevents tasks from trying to execute after blueprints are cleared
+        if (ProviderRegistry.isInitialized(IBlueprintScheduler.class)) {
+            final IBlueprintScheduler scheduler = IBlueprintScheduler.INSTANCE;
+            if (scheduler instanceof BlueprintScheduler blueprintScheduler) {
+                blueprintScheduler.cancel_all();
+            }
+        }
     }
 }

@@ -27,16 +27,22 @@ public class CycleDetectedException extends ValidationException {
 
     private static String format(List<IBlueprintNode> cycle_path) {
         if (cycle_path.isEmpty()) {
-            return "[]";
+            return "[] (empty cycle)";
         }
 
         final StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%d nodes form a cycle: ", cycle_path.size()));
+
         for (int i = 0; i < cycle_path.size(); i++) {
-            builder.append(cycle_path.get(i).getName());
+            final IBlueprintNode node = cycle_path.get(i);
+            builder.append(String.format("'%s' (id: %s)", node.getName(), node.getId()));
+
             if (i < cycle_path.size() - 1) {
                 builder.append(" -> ");
             }
         }
+
+        builder.append(". This cycle prevents execution as it would loop infinitely.");
 
         return builder.toString();
     }

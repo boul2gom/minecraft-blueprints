@@ -1,43 +1,57 @@
 package fr.boul2gom.blueprints.api.execution.context;
 
-import fr.boul2gom.blueprints.MinecraftBlueprints;
 import fr.boul2gom.blueprints.api.execution.IBlueprintExecutor;
-import fr.boul2gom.blueprints.api.execution.IBlueprintScheduler;
 import fr.boul2gom.blueprints.api.execution.debug.IExecutionLogger;
+import fr.boul2gom.blueprints.api.execution.monitoring.IExecutionMonitor;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
-import fr.boul2gom.blueprints.api.pin.PinDirection;
-import fr.boul2gom.blueprints.execution.BlueprintScheduler;
+import fr.boul2gom.blueprints.execution.context.IterationTracker;
+import fr.boul2gom.blueprints.execution.context.VariableProvider;
 import fr.boul2gom.blueprints.execution.debug.ExecutionLogger;
+import fr.boul2gom.blueprints.execution.monitoring.ExecutionMonitor;
+import fr.boul2gom.blueprints.execution.planning.PinResolver;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Default implementation of IExecutionContext.
- * Provides a complete execution environment for blueprint execution including
- * variable storage, data flow resolution, world/entity context, and safety limit enforcement.
+ * Refactored implementation of IExecutionContext using provider pattern.
+ * Delegates responsibilities to specialized providers:
+ * - VariableProvider: Variable storage and retrieval
+ * - PinResolver: Pin value resolution and pure node evaluation
+ * - IterationTracker: Loop iteration tracking
+ * - ExecutionMonitor: Safety limits and execution statistics
+ *
+ * Thread-safety: NOT THREAD-SAFE
+ * - Each ExecutionContext instance must be used by only one execution at a time
+ * - Do NOT share an ExecutionContext across multiple concurrent blueprint executions
+ * - Create a new ExecutionContext for each blueprint execution
+ * - Internal state (current_node, pin values, iteration counters) is not synchronized
+ *
+ * Resource management: AUTOCLOSEABLE
+ * - Implements AutoCloseable for proper resource cleanup
+ * - close() clears all internal caches and state
+ * - Recommended usage: try-with-resources pattern
  */
 public class ExecutionContext implements IExecutionContext {
 
-    private final IVariableRegistry variables;
+    private final IVariableProvider variable_provider;
+    private final IVariableRegistry variable_registry;
+
+    private final PinResolver pin_resolver;
+    private final IIterationTracker iteration_tracker;
+    private final IExecutionMonitor execution_monitor;
     private final IExecutionLogger logger;
+
     private final World world;
     private final Entity entity;
-    private final Instant start_time;
     private final Duration timeout;
     private final int max_nodes;
 
-    private final Map<IBlueprintPin, Object> pin_values;
-    private final Map<IBlueprintNode, Integer> iterations;
-
     private IBlueprintNode current_node;
-    private int nodes_executed;
 
     public ExecutionContext(@Nullable World world, @Nullable Entity entity) {
         this(world, entity, IBlueprintExecutor.MAX_EXECUTION_TIME, IBlueprintExecutor.MAX_NODES_PER_EXECUTION);
@@ -48,100 +62,45 @@ public class ExecutionContext implements IExecutionContext {
     }
 
     public ExecutionContext(@Nullable World world, @Nullable Entity entity, Duration timeout, int max_nodes, boolean logging) {
-        this.variables = new VariableRegistry();
+        // Initialize providers
+        this.variable_registry = new VariableRegistry();
+        this.variable_provider = new VariableProvider(this.variable_registry);
+
+        this.iteration_tracker = new IterationTracker();
+        this.execution_monitor = new ExecutionMonitor();
         this.logger = new ExecutionLogger(logging);
-        this.start_time = Instant.now();
+
         this.world = world;
         this.entity = entity;
         this.timeout = timeout;
         this.max_nodes = max_nodes;
-        this.pin_values = new HashMap<>();
-        this.iterations = new HashMap<>();
-
         this.current_node = null;
-        this.nodes_executed = 0;
+
+        // Initialize PinResolver with callbacks (no two-phase initialization)
+        this.pin_resolver = new PinResolver(
+            () -> this.current_node,
+            node -> this.current_node = node,
+            node -> node.execute(this)  // Returns CompletableFuture
+        );
+
+        // Start monitoring
+        this.execution_monitor.start();
     }
 
     @Override
     public IVariableRegistry getVariables() {
-        return this.variables;
+        return this.variable_registry;
     }
 
     @Override
     @Nullable
     public Object get_pin_value(IBlueprintPin pin) {
-        if (pin.getDirection() != PinDirection.INPUT) {
-            // Only input pins can request values
-            return null;
-        }
-
-        // If value already cached, return it
-        if (this.pin_values.containsKey(pin)) {
-            return this.pin_values.get(pin);
-        }
-
-        // Find connected output pin
-        if (!pin.isConnected()) {
-            return null;
-        }
-
-        // Get the connected output pin (input pins have at most 1 connection)
-        final IBlueprintPin output_pin = pin.getPins().stream()
-            .filter(p -> p.getDirection() == PinDirection.OUTPUT)
-            .findFirst()
-            .orElse(null);
-
-        if (output_pin == null) {
-            return null;
-        }
-
-        // If the output pin already has a cached value, return it
-        if (this.pin_values.containsKey(output_pin)) {
-            return this.pin_values.get(output_pin);
-        }
-
-        // If source node is pure (no exec pins), evaluate it on-demand
-        final IBlueprintNode source_node = output_pin.getNode();
-        if (this.is_pure_node(source_node)) {
-            // Save current node and restore after
-            final IBlueprintNode previous_node = this.current_node;
-            this.current_node = source_node;
-
-            // Execute the pure node
-            source_node.execute(this);
-
-            // Restore previous node
-            this.current_node = previous_node;
-
-            // Return the value that should now be cached
-            return this.pin_values.get(output_pin);
-        }
-
-        return null;
+        return this.pin_resolver.resolve(pin).orElse(null);
     }
 
     @Override
     public void set_pin_value(IBlueprintPin pin, @Nullable Object value) {
-        this.pin_values.put(pin, value);
-    }
-
-    /**
-     * Checks if a node is pure (has no execution pins).
-     * Pure nodes are evaluated on-demand when their outputs are needed.
-     */
-    private boolean is_pure_node(IBlueprintNode node) {
-        // Check if any input or output pin is an execution pin
-        for (final IBlueprintPin input : node.getInputs()) {
-            if (input.isExecution()) {
-                return false;
-            }
-        }
-        for (final IBlueprintPin output : node.getOutputs()) {
-            if (output.isExecution()) {
-                return false;
-            }
-        }
-        return true;
+        this.pin_resolver.set(pin, value);
     }
 
     @Override
@@ -169,17 +128,17 @@ public class ExecutionContext implements IExecutionContext {
 
     @Override
     public Instant get_start_time() {
-        return this.start_time;
+        return this.execution_monitor.get_start_time();
     }
 
     @Override
     public int get_nodes_executed() {
-        return this.nodes_executed;
+        return this.execution_monitor.get_node_count();
     }
 
     @Override
     public void increment_nodes() {
-        this.nodes_executed++;
+        this.execution_monitor.increment_node_count();
     }
 
     @Override
@@ -194,14 +153,8 @@ public class ExecutionContext implements IExecutionContext {
 
     @Override
     public boolean isStoppingNeeded() {
-        // Check if execution time exceeded
-        final Duration elapsed_time = Duration.between(this.start_time, Instant.now());
-        if (elapsed_time.compareTo(this.timeout) > 0) {
-            return true;
-        }
-
-        // Check if node limit exceeded
-        return this.nodes_executed >= this.max_nodes;
+        return this.execution_monitor.has_timed_out(this.timeout.toMillis())
+            || this.execution_monitor.has_exceeded_node_limit(this.max_nodes);
     }
 
     @Override
@@ -211,32 +164,92 @@ public class ExecutionContext implements IExecutionContext {
 
     @Override
     public int getIterations(IBlueprintNode node) {
-        return this.iterations.getOrDefault(node, 0);
+        return this.iteration_tracker.getCount(node);
     }
 
     @Override
     public void increment_iterations(IBlueprintNode node) {
-        final int current = this.getIterations(node);
-        this.iterations.put(node, current + 1);
+        this.iteration_tracker.increment(node);
     }
 
     @Override
     public void reset_iterations(IBlueprintNode node) {
-        this.iterations.remove(node);
+        this.iteration_tracker.reset(node);
     }
 
     @Override
-    public boolean hasExceededIterations(IBlueprintNode node) {
-        return this.getIterations(node) >= IBlueprintExecutor.MAX_ITERATIONS_PER_LOOP;
+    public boolean has_exceeded_iterations(IBlueprintNode node) {
+        return this.iteration_tracker.hasExceeded(node, IBlueprintExecutor.MAX_ITERATIONS_PER_LOOP);
     }
 
+    /**
+     * Sets a pin value that will be applied to the next frame when push_frame() is called.
+     * This ensures loop output pins (like ForLoop's index) are accessible in the loop body frame.
+     *
+     * Usage pattern:
+     * 1. Loop node calculates output values (e.g., current index)
+     * 2. Loop node calls set_pin_value_for_next_frame(index_pin, current_index)
+     * 3. Loop node returns Set.of("loop_body")
+     * 4. Executor calls push_frame()
+     * 5. Loop body nodes can now access the index value
+     *
+     * @param pin The output pin to set
+     * @param value The value to store in the next frame
+     */
+    public void set_pin_value_for_next_frame(IBlueprintPin pin, Object value) {
+        this.pin_resolver.set_pin_value_for_next_frame(pin, value);
+    }
+
+    /**
+     * Pushes a new execution frame for loop isolation.
+     * Call this before entering a loop body.
+     *
+     * @param owner The loop node creating the frame
+     */
+    public void push_frame(IBlueprintNode owner) {
+        this.pin_resolver.push_frame(owner);
+    }
+
+    /**
+     * Pops the current execution frame.
+     * Call this after exiting a loop body.
+     */
+    public void pop_frame() {
+        this.pin_resolver.pop_frame();
+    }
+
+    /**
+     * Cleans up all resources used by this execution context.
+     * Clears caches, resets counters, and releases references.
+     *
+     * This method is idempotent and can be called multiple times safely.
+     * After calling close(), the context should not be reused.
+     */
     @Override
-    public IBlueprintScheduler getScheduler() {
-        return BlueprintScheduler.getInstance();
+    public void close() {
+        // Clear pin value cache
+        this.pin_resolver.clear_cache();
+
+        // Clear iteration counters
+        this.iteration_tracker.clear();
+
+        // Clear variables
+        this.variable_provider.clear();
+
+        // Clear execution log
+        this.logger.clear();
+
+        // Reset monitoring state (optional, as these are just counters)
+        // execution_monitor.reset() - not called as it would affect ongoing monitoring
     }
 
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("ExecutionContext(world=%s, entity=%s, timeout=%dms, max_nodes=%d, nodes_executed=%d)",
+            this.world != null ? this.world.getRegistryKey().getValue() : "null",
+            this.entity != null ? this.entity.getType().getName().getString() : "null",
+            this.timeout.toMillis(),
+            this.max_nodes,
+            this.get_nodes_executed());
     }
 }

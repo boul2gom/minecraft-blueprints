@@ -81,6 +81,6 @@ public class VariableRegistry implements IVariableRegistry {
 
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("VariableRegistry(size=%d)", this.variables.size());
     }
 }

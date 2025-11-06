@@ -72,8 +72,15 @@ public interface IBlueprintNode {
      * @return a CompletableFuture that resolves to a Set of active output execution pin IDs.
      *         - For synchronous nodes: return CompletableFuture.completedFuture(Set.of("pin_id"))
      *         - For async nodes: return a future that completes later
-     *         - Empty set or null: follow all execution output pins (backward compatibility)
+     *         - null or empty set (Set.of()): stops execution (no output pins activated)
      *         - Non-execution pins are not included in the returned set
+     *
+     *         Example for branch node:
+     *         - If condition true: return Set.of("true_branch")
+     *         - If condition false: return Set.of("false_branch")
+     *
+     *         Example for terminal node:
+     *         - return null or Set.of() to stop execution
      */
     CompletableFuture<Set<String>> execute(IExecutionContext context);
 
@@ -88,4 +95,15 @@ public interface IBlueprintNode {
      * @param position the spatial position of the node.
      */
     void setPosition(NodePosition position);
+
+    /**
+     * Returns whether this node is a loop node that creates iteration frames.
+     * Loop nodes have their loop body executed in isolated execution frames
+     * to prevent pin value pollution across iterations.
+     *
+     * @return true if this is a loop node (ForLoop, WhileLoop, etc.), false otherwise
+     */
+    default boolean is_loop_node() {
+        return false;
+    }
 }

@@ -2,7 +2,6 @@ package fr.boul2gom.blueprints.execution;
 
 import fr.boul2gom.blueprints.MinecraftBlueprints;
 import fr.boul2gom.blueprints.api.execution.IBlueprintScheduler;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +13,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BlueprintScheduler implements IBlueprintScheduler {
 
-    private static BlueprintScheduler instance;
-
-    private final List<ScheduledTask> tasks;
-
-    private BlueprintScheduler() {
-        this.tasks = new ArrayList<>();
-    }
-
-    public static BlueprintScheduler getInstance() {
-        if (instance == null) {
-            instance = new BlueprintScheduler();
-            instance.register_tick_handler();
-        }
-        return instance;
-    }
-
-    private void register_tick_handler() {
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            this.tick();
-        });
-    }
+    private final List<ScheduledTask> tasks = new ArrayList<>();
 
     @Override
     public CompletableFuture<Void> schedule(int ticks, Runnable task) {
@@ -55,13 +34,7 @@ public class BlueprintScheduler implements IBlueprintScheduler {
     }
 
     @Override
-    public int pending() {
-        synchronized (this.tasks) {
-            return this.tasks.size();
-        }
-    }
-
-    private void tick() {
+    public void tick_scheduler() {
         final List<ScheduledTask> ready_tasks = new ArrayList<>();
 
         synchronized (this.tasks) {
@@ -90,8 +63,42 @@ public class BlueprintScheduler implements IBlueprintScheduler {
         }
     }
 
+    @Override
+    public int pending() {
+        synchronized (this.tasks) {
+            return this.tasks.size();
+        }
+    }
+
+    /**
+     * Cancels all pending scheduled tasks.
+     * This should be called during server shutdown or when clearing blueprint registry.
+     * All associated CompletableFutures will be completed exceptionally.
+     */
+    public void cancel_all() {
+        final List<ScheduledTask> to_cancel;
+
+        synchronized (this.tasks) {
+            to_cancel = new ArrayList<>(this.tasks);
+            this.tasks.clear();
+        }
+
+        for (final ScheduledTask task : to_cancel) {
+            task.future.completeExceptionally(
+                new Exception("Task cancelled: Blueprint scheduler cleared")
+            );
+        }
+
+        MinecraftBlueprints.LOGGER.info("Cancelled {} pending scheduled tasks", to_cancel.size());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("BlueprintScheduler(pending_tasks=%d)", this.pending());
+    }
+
     private static class ScheduledTask {
-        int ticks_remaining;
+        volatile int ticks_remaining;  // Volatile ensures visibility across threads
         final Runnable runnable;
         final CompletableFuture<Void> future;
 

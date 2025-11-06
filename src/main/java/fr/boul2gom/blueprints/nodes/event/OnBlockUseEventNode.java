@@ -46,16 +46,8 @@ public class OnBlockUseEventNode extends EventNode {
 
     @Override
     public CompletableFuture<Set<String>> execute(IExecutionContext context) {
-        // Event nodes typically don't execute logic - they just provide data
-        // Event data is set by the event handler before execution starts
-
-        // The output pin values should be set by the event handler:
-        // context.set_pin_value(getOutput("player"), player)
-        // context.set_pin_value(getOutput("blockPos"), blockPos)
-        // context.set_pin_value(getOutput("world"), world)
-        // context.set_pin_value(getOutput("hand"), hand.name())
-
-        // Return the execution pin to follow
+        // Event data is set on output pins by the event handler before execution
+        // This node just provides the entry point and forwards execution flow
         return CompletableFuture.completedFuture(Set.of("exec"));
     }
 }

@@ -47,6 +47,10 @@ public record ExecutionResult(Type type, String error, Duration execution_time, 
 
     @Override
     public @NotNull String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("ExecutionResult(type=%s, execution_time=%dms, nodes_executed=%d%s)",
+                this.type,
+                this.execution_time.toMillis(),
+                this.nodes_executed,
+                this.error != null ? ", error=" + this.error : "");
     }
 }

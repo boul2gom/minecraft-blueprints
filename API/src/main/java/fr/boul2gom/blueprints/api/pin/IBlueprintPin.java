@@ -72,7 +72,7 @@ public interface IBlueprintPin {
      * @param pin the pin to check connection to.
      * @return true if the pin is connected to the specified pin, false otherwise.
      */
-    boolean isConnectedTo(IBlueprintPin pin);
+    boolean is_connected_to(IBlueprintPin pin);
 
     /**
      * Check if the pin can connect to another pin.

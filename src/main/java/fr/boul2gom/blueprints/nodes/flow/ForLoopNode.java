@@ -1,5 +1,6 @@
 package fr.boul2gom.blueprints.nodes.flow;
 
+import fr.boul2gom.blueprints.api.exception.validation.ValidationException;
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.BlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodeFactory;
@@ -54,12 +55,17 @@ public class ForLoopNode extends BlueprintNode {
         final IBlueprintPin last = this.getInput("last_index");
 
         if (first == null || !first.isConnected()) {
-            throw new IllegalStateException("ForLoop node requires 'first_index' input to be connected");
+            throw new ValidationException("ForLoop node requires 'first_index' input to be connected");
         }
 
         if (last == null || !last.isConnected()) {
-            throw new IllegalStateException("ForLoop node requires 'last_index' input to be connected");
+            throw new ValidationException("ForLoop node requires 'last_index' input to be connected");
         }
+    }
+
+    @Override
+    public boolean is_loop_node() {
+        return true;
     }
 
     @Override
@@ -70,27 +76,69 @@ public class ForLoopNode extends BlueprintNode {
         final Object first_value = context.get_pin_value(first_pin);
         final Object last_value = context.get_pin_value(last_pin);
 
-        final int first_index = first_value instanceof Number num ? num.intValue() : 0;
-        final int last_index = last_value instanceof Number num ? num.intValue() : 0;
+        // Runtime validation: ensure values are numbers
+        if (first_value == null) {
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': first_index has no value", this.getName())
+            );
+        }
+        if (!(first_value instanceof Number)) {
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': first_index must be a number, got %s",
+                    this.getName(), first_value.getClass().getSimpleName())
+            );
+        }
 
-        // Calculate current index based on iteration count
-        // Note: getIterations returns count BEFORE increment (executor increments before execute)
-        // So iteration 0 means this is the SECOND execution (first was iteration -1... wait no)
-        // Actually: executor increments BEFORE calling execute, so getIterations() returns the current count
-        // So we need to subtract 1 to get the iteration number
-        final int iterations = context.getIterations(this) - 1;
-        final int current_index = first_index + iterations;
+        if (last_value == null) {
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': last_index has no value", this.getName())
+            );
+        }
+        if (!(last_value instanceof Number)) {
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': last_index must be a number, got %s",
+                    this.getName(), last_value.getClass().getSimpleName())
+            );
+        }
 
-        // Output current index
+        final int first_index = ((Number) first_value).intValue();
+        final int last_index = ((Number) last_value).intValue();
+
+        // Runtime validation: ensure range is reasonable (prevent memory exhaustion)
+        final long range = (long) last_index - (long) first_index + 1;
+        if (range < 0) {
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': invalid range [%d, %d] (first_index > last_index)",
+                    this.getName(), first_index, last_index)
+            );
+        }
+        if (range > 1000000) { // Max 1 million iterations
+            throw new IllegalStateException(
+                String.format("ForLoop node '%s': range too large [%d, %d] = %d iterations (max 1,000,000)",
+                    this.getName(), first_index, last_index, range)
+            );
+        }
+
+        // Get current iteration count (0-based)
+        // First iteration: getIterations() returns 0, index = first_index
+        // Second iteration: getIterations() returns 1, index = first_index + 1
+        // Counter incremented by executor AFTER this method completes
+        final int iteration_index = context.getIterations(this);
+        final int current_index = first_index + iteration_index;
+
+        // Output current index - use set_pin_value_for_next_frame() to ensure
+        // the index is accessible in the loop body frame, not the parent frame
         final IBlueprintPin index_output = this.getOutput("index");
-        context.set_pin_value(index_output, current_index);
+        context.set_pin_value_for_next_frame(index_output, current_index);
 
         // Check if we should continue looping
         if (current_index <= last_index) {
-            // Continue loop: execute loopBody
+            // Frame push/pop is handled by BlueprintExecutor for isolation
+            // Each iteration runs in a fresh execution frame
             return CompletableFuture.completedFuture(Set.of("loop_body"));
         } else {
-            // Loop finished: execute completed
+            // Loop finished: reset iteration counter and execute completed
+            context.reset_iterations(this);
             return CompletableFuture.completedFuture(Set.of("completed"));
         }
     }

@@ -100,4 +100,37 @@ public enum PinType {
     public boolean isExecution() {
         return this == EXECUTION_FLOW;
     }
+
+    /**
+     * Checks if this pin type is compatible with another pin type for connections.
+     * Compatibility rules:
+     * - Execution flow pins can only connect to execution flow pins
+     * - Exact type matches are always compatible
+     * - Numeric types (INTEGER, FLOAT) can connect to each other (with implicit casting)
+     * - All other type combinations are incompatible
+     *
+     * @param other the other pin type to check compatibility with
+     * @return true if the types are compatible, false otherwise
+     */
+    public boolean is_compatible_with(PinType other) {
+        if (other == null) {
+            return false;
+        }
+
+        // Exact match is always compatible
+        if (this == other) {
+            return true;
+        }
+
+        // Execution flow can only connect to execution flow
+        if (this.isExecution() || other.isExecution()) {
+            return false;
+        }
+
+        // Numeric type compatibility (INTEGER <-> FLOAT)
+        final boolean this_is_numeric = this == INTEGER || this == FLOAT;
+        final boolean other_is_numeric = other == INTEGER || other == FLOAT;
+        // All other combinations are incompatible
+        return this_is_numeric && other_is_numeric;
+    }
 }

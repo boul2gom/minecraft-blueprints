@@ -5,16 +5,19 @@ import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodeFactory;
 import fr.boul2gom.blueprints.api.node.NodePosition;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Central registry for node factories. Allows registration and instantiation of nodes by ID.
+ *
+ * Thread-safety: This registry is thread-safe for concurrent access.
+ * - Uses ConcurrentHashMap for lock-free reads
+ * - register() and create() can be called from multiple threads
  */
 public class NodeRegistry {
 
-    private static final Map<String, NodeFactory> FACTORIES = new HashMap<>();
+    private static final Map<String, NodeFactory> FACTORIES = new ConcurrentHashMap<>();
 
     /**
      * Registers a node factory with a unique ID.
@@ -45,10 +48,12 @@ public class NodeRegistry {
 
     /**
      * Gets all registered node IDs.
-     * @return a set of all registered node IDs
+     * Returns an immutable copy to prevent external modification.
+     *
+     * @return an immutable set of all registered node IDs
      */
     public static Set<String> get_all_node_ids() {
-        return FACTORIES.keySet();
+        return Set.copyOf(FACTORIES.keySet());
     }
 
     /**
@@ -61,9 +66,11 @@ public class NodeRegistry {
     }
 
     /**
-     * Clears all registered factories. Used for testing.
+     * Clears all registered factories.
+     * This is useful for testing and lifecycle management (e.g., mod reload, server shutdown).
+     * After calling this method, all previously registered nodes will be unregistered.
      */
-    static void clear() {
+    public static void clear() {
         FACTORIES.clear();
     }
 }

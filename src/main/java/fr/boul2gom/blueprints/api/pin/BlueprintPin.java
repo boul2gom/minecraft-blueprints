@@ -4,7 +4,10 @@ import fr.boul2gom.blueprints.MinecraftBlueprints;
 import fr.boul2gom.blueprints.api.connection.BlueprintConnection;
 import fr.boul2gom.blueprints.api.connection.IBlueprintConnection;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
+import fr.boul2gom.blueprints.graph.observer.GraphTopologySubject;
+import fr.boul2gom.blueprints.api.graph.observer.TopologyEventType;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class BlueprintPin implements IBlueprintPin {
@@ -17,6 +20,10 @@ public class BlueprintPin implements IBlueprintPin {
 
     // All connections this pin is part of (INPUT: max 1, OUTPUT: many)
     private final Set<IBlueprintConnection> connections;
+
+    // Observer subject for notifying topology changes (injected by BlueprintGraph)
+    // WeakReference prevents memory leaks if pins are not properly removed from graphs
+    private WeakReference<GraphTopologySubject> topology_subject;
 
     public BlueprintPin(String id, String name, PinType type, PinDirection direction, IBlueprintNode node) {
         Objects.requireNonNull(id, "Pin id may not be null");
@@ -63,13 +70,24 @@ public class BlueprintPin implements IBlueprintPin {
         return this.node;
     }
 
+    /**
+     * Set the topology subject for notifying observers of connection changes.
+     * This is called by BlueprintGraph when pins are added to nodes.
+     * Uses WeakReference to prevent memory leaks from circular references.
+     *
+     * @param subject the topology subject
+     */
+    public void set_topology_subject(GraphTopologySubject subject) {
+        this.topology_subject = subject != null ? new WeakReference<>(subject) : null;
+    }
+
     @Override
     public boolean isConnected() {
         return !this.connections.isEmpty();
     }
 
     @Override
-    public boolean isConnectedTo(IBlueprintPin pin) {
+    public boolean is_connected_to(IBlueprintPin pin) {
         Objects.requireNonNull(pin, "Pin may not be null");
 
         return this.connections.stream()
@@ -96,14 +114,7 @@ public class BlueprintPin implements IBlueprintPin {
         }
 
         final PinType other_type = pin.getType();
-
-        // Execution pins ONLY connect to other execution pins
-        if (this.type.isExecution() || other_type.isExecution()) {
-            return this.type.isExecution() && other_type.isExecution();
-        }
-
-        // Data pins must have matching types
-        if (this.type != other_type) {
+        if (!this.type.is_compatible_with(other_type)) {
             return false;
         }
 
@@ -142,7 +153,12 @@ public class BlueprintPin implements IBlueprintPin {
             other.connections.add(connection);
         }
 
-        // TODO: Notify execution engine that graph topology has changed (for re-validation)
+        // Notify observers of topology change
+        final GraphTopologySubject subject = this.topology_subject != null ? this.topology_subject.get() : null;
+        if (subject != null) {
+            final String context = String.format("%s -> %s", output.getId(), input.getId());
+            subject.notify_observers(TopologyEventType.CONNECTION_ADDED, context);
+        }
     }
 
     @Override
@@ -163,7 +179,12 @@ public class BlueprintPin implements IBlueprintPin {
         // Clear all connections from this pin
         this.connections.clear();
 
-        // TODO: Notify execution engine that graph topology has changed (for re-validation)
+        // Notify observers of topology change
+        final GraphTopologySubject subject = this.topology_subject != null ? this.topology_subject.get() : null;
+        if (subject != null) {
+            final String context = String.format("All connections from %s", this.getId());
+            subject.notify_observers(TopologyEventType.CONNECTION_REMOVED, context);
+        }
     }
 
     @Override
@@ -187,7 +208,12 @@ public class BlueprintPin implements IBlueprintPin {
             other.connections.remove(connection);
         }
 
-        // TODO: Notify execution engine that graph topology has changed (for re-validation)
+        // Notify observers of topology change
+        final GraphTopologySubject subject = this.topology_subject != null ? this.topology_subject.get() : null;
+        if (subject != null) {
+            final String context = String.format("%s disconnected from %s", this.getId(), pin.getId());
+            subject.notify_observers(TopologyEventType.CONNECTION_REMOVED, context);
+        }
     }
 
     @Override
@@ -234,6 +260,7 @@ public class BlueprintPin implements IBlueprintPin {
 
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("BlueprintPin(id=%s, name=%s, type=%s, direction=%s, node=%s, connected=%b)",
+            this.id, this.name, this.type, this.direction, this.node.getId(), this.isConnected());
     }
 }

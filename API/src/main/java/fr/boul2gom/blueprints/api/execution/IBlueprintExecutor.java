@@ -2,6 +2,7 @@ package fr.boul2gom.blueprints.api.execution;
 
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.graph.IBlueprintGraph;
+import fr.boul2gom.blueprints.api.provider.ProviderRegistry;
 
 import java.time.Duration;
 
@@ -22,9 +23,19 @@ import java.time.Duration;
  * Primary Responsibilities:
  * - Executing blueprint graphs with a given execution context.
  * - Adhering to pre-defined execution constraints such as the time limit and node limit.
+ *
+ * Provider Pattern:
+ * - INSTANCE provides lazy-initialized singleton access to the executor
+ * - Implementation is registered via ProviderRegistry during mod initialization
+ * - Allows dependency injection and testing with mock implementations
  */
-@FunctionalInterface
 public interface IBlueprintExecutor {
+
+    /**
+     * Lazy-initialized singleton instance.
+     * The actual implementation is provided by the core module via ProviderRegistry.
+     */
+    IBlueprintExecutor INSTANCE = ProviderRegistry.get(IBlueprintExecutor.class);
 
     /** Maximum execution time */
     Duration MAX_EXECUTION_TIME = Duration.ofMillis(50);

@@ -49,7 +49,6 @@ public class GraphValidator {
 
         if (orphaned_count > 0) {
             // Log warning but don't fail validation
-            // TODO: Add proper logging when logging system is implemented
             MinecraftBlueprints.LOGGER.info("Warning: Graph contains {} orphaned node(s)", orphaned_count);
         }
 
@@ -57,5 +56,10 @@ public class GraphValidator {
         if (this.graph.get_entry_points().isEmpty()) {
             throw new ValidationException("Graph has no entry points (nodes with unconnected execution inputs)");
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("GraphValidator(graph=%s)", this.graph.getId());
     }
 }

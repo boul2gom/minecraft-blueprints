@@ -1,5 +1,6 @@
 package fr.boul2gom.blueprints.nodes.flow;
 
+import fr.boul2gom.blueprints.api.exception.validation.ValidationException;
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.BlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodeFactory;
@@ -7,6 +8,7 @@ import fr.boul2gom.blueprints.api.node.NodePosition;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.TypeConverter;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +47,7 @@ public class BranchNode extends BlueprintNode {
     public void validate() {
         final IBlueprintPin condition = this.getInput("condition");
         if (condition == null || !condition.isConnected()) {
-            throw new IllegalStateException("Branch node requires 'condition' input to be connected");
+            throw new ValidationException("Branch node requires 'condition' input to be connected");
         }
     }
 
@@ -54,8 +56,11 @@ public class BranchNode extends BlueprintNode {
         final IBlueprintPin condition_pin = this.getInput("condition");
         final Object condition_value = context.get_pin_value(condition_pin);
 
-        // Evaluate condition
-        final boolean condition = condition_value instanceof Boolean bool ? bool : false;
+        // Evaluate condition with strict type validation (control flow requires explicit boolean)
+        final boolean condition = TypeConverter.require_boolean(
+            condition_value,
+            String.format("Branch node '%s' condition pin", this.getName())
+        ).booleanValue();
 
         // Return the appropriate pin to follow based on condition
         final String active_pin = condition ? "true" : "false";

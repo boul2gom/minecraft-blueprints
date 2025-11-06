@@ -131,8 +131,30 @@ public abstract class BlueprintNode implements IBlueprintNode {
         return Objects.hash(this.id);
     }
 
+    /**
+     * Helper method to validate that an input pin is connected.
+     * Reduces code duplication across node implementations.
+     *
+     * @param pin_id the ID of the input pin to check
+     * @throws IllegalStateException if the pin is not found or not connected
+     */
+    protected void require_connected(String pin_id) {
+        final IBlueprintPin pin = this.getInput(pin_id);
+        if (pin == null) {
+            throw new IllegalStateException(
+                String.format("%s: input pin '%s' not found", this.name, pin_id)
+            );
+        }
+        if (!pin.isConnected()) {
+            throw new IllegalStateException(
+                String.format("%s: input pin '%s' must be connected", this.name, pin_id)
+            );
+        }
+    }
+
     @Override
     public String toString() {
-        return MinecraftBlueprints.GSON.toJson(this);
+        return String.format("BlueprintNode(id=%s, name=%s, inputs=%d, outputs=%d, position=%s)",
+            this.id, this.name, this.inputs.size(), this.outputs.size(), this.position);
     }
 }

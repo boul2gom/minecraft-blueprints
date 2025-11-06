@@ -1,6 +1,5 @@
 package fr.boul2gom.blueprints.api.execution.context;
 
-import fr.boul2gom.blueprints.api.execution.IBlueprintScheduler;
 import fr.boul2gom.blueprints.api.execution.debug.IExecutionLogger;
 import fr.boul2gom.blueprints.api.node.IBlueprintNode;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
@@ -23,7 +22,7 @@ import java.time.Instant;
  * 4. Execution Tracking - Monitoring execution progress and enforcing safety limits
  * 5. Debug Logging - Recording execution steps for debugging and profiling
  */
-public interface IExecutionContext {
+public interface IExecutionContext extends AutoCloseable {
 
     /**
      * Returns the variable registry for this execution context.
@@ -55,6 +54,26 @@ public interface IExecutionContext {
      * @param value the value to set
      */
     void set_pin_value(IBlueprintPin pin, @Nullable Object value);
+
+    /**
+     * Sets a pin value that will be applied to the next execution frame when entering a loop body.
+     * This ensures loop output pins (like ForLoop's index) are accessible in the loop body frame.
+     *
+     * Usage: Loop nodes should use this method instead of set_pin_value() for output pins
+     * that need to be visible inside the loop body.
+     *
+     * Example:
+     * <pre>
+     * // In ForLoopNode.execute():
+     * context.set_pin_value_for_next_frame(index_output, current_index);
+     * return CompletableFuture.completedFuture(Set.of("loop_body"));
+     * // Now index is accessible to nodes inside loop_body
+     * </pre>
+     *
+     * @param pin the output pin to set the value for
+     * @param value the value to store in the next frame
+     */
+    void set_pin_value_for_next_frame(IBlueprintPin pin, @Nullable Object value);
 
     /**
      * Returns the Minecraft world in which this blueprint is executing.
@@ -176,13 +195,5 @@ public interface IExecutionContext {
      * @param node the loop node to check
      * @return true if the iteration limit has been exceeded
      */
-    boolean hasExceededIterations(IBlueprintNode node);
-
-    /**
-     * Returns the blueprint scheduler for tick-based async operations.
-     * Used by nodes like DelayNode to schedule delayed execution.
-     *
-     * @return the scheduler instance
-     */
-    IBlueprintScheduler getScheduler();
+    boolean has_exceeded_iterations(IBlueprintNode node);
 }
