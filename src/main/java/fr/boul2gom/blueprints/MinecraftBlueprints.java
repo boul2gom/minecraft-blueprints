@@ -167,30 +167,30 @@ public class MinecraftBlueprints implements ModInitializer {
      * Common pattern for executing blueprints triggered by events.
      * Reduces code duplication across event handlers.
      *
-     * @param eventId the event identifier (exception.g., "on_block_use")
+     * @param event_id the event identifier (exception.g., "on_block_use")
      * @param executor the blueprint executor
      * @param context creates ExecutionContext for the event
-     * @param eventNodeClass the expected event node class for type checking
-     * @param pinConfigurator configures output pins on the event node
+     * @param event_node_class the expected event node class for type checking
+     * @param pin_configurator configures output pins on the event node
      */
     private <T extends IBlueprintNode> void execute_event_blueprint(
-            String eventId,
+            String event_id,
             IBlueprintExecutor executor,
             IExecutionContext context,
-            Class<T> eventNodeClass,
-            Consumer<T> pinConfigurator
+            Class<T> event_node_class,
+            Consumer<T> pin_configurator
     ) {
-        final List<IBlueprintGraph> blueprints = BlueprintRegistry.get_blueprints_for_event(eventId);
+        final List<IBlueprintGraph> blueprints = BlueprintRegistry.get_blueprints_for_event(event_id);
         for (final IBlueprintGraph blueprint : blueprints) {
             // Find event node with type safety
             final IBlueprintNode event_node = blueprint.get_entry_points().stream()
-                .filter(eventNodeClass::isInstance)
+                .filter(event_node_class::isInstance)
                 .findFirst()
                 .orElse(null);
 
             if (event_node != null) {
                 // Configure event node pins
-                pinConfigurator.accept(eventNodeClass.cast(event_node));
+                pin_configurator.accept(event_node_class.cast(event_node));
             }
 
             // Execute blueprint

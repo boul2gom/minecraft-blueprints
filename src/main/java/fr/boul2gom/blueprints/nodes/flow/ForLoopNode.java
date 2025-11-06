@@ -1,6 +1,7 @@
 package fr.boul2gom.blueprints.nodes.flow;
 
 import fr.boul2gom.blueprints.api.exception.validation.ValidationException;
+import fr.boul2gom.blueprints.api.execution.IBlueprintExecutor;
 import fr.boul2gom.blueprints.api.execution.context.IExecutionContext;
 import fr.boul2gom.blueprints.api.node.BlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodeFactory;
@@ -8,6 +9,7 @@ import fr.boul2gom.blueprints.api.node.NodePosition;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.TypeConverter;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -51,16 +53,7 @@ public class ForLoopNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        final IBlueprintPin first = this.getInput("first_index");
-        final IBlueprintPin last = this.getInput("last_index");
-
-        if (first == null || !first.isConnected()) {
-            throw new ValidationException("ForLoop node requires 'first_index' input to be connected");
-        }
-
-        if (last == null || !last.isConnected()) {
-            throw new ValidationException("ForLoop node requires 'last_index' input to be connected");
-        }
+        require_connected("first_index", "last_index");
     }
 
     @Override
@@ -77,32 +70,14 @@ public class ForLoopNode extends BlueprintNode {
         final Object last_value = context.get_pin_value(last_pin);
 
         // Runtime validation: ensure values are numbers
-        if (first_value == null) {
-            throw new IllegalStateException(
-                String.format("ForLoop node '%s': first_index has no value", this.getName())
-            );
-        }
-        if (!(first_value instanceof Number)) {
-            throw new IllegalStateException(
-                String.format("ForLoop node '%s': first_index must be a number, got %s",
-                    this.getName(), first_value.getClass().getSimpleName())
-            );
-        }
-
-        if (last_value == null) {
-            throw new IllegalStateException(
-                String.format("ForLoop node '%s': last_index has no value", this.getName())
-            );
-        }
-        if (!(last_value instanceof Number)) {
-            throw new IllegalStateException(
-                String.format("ForLoop node '%s': last_index must be a number, got %s",
-                    this.getName(), last_value.getClass().getSimpleName())
-            );
-        }
-
-        final int first_index = ((Number) first_value).intValue();
-        final int last_index = ((Number) last_value).intValue();
+        final int first_index = TypeConverter.require_int(
+            first_value,
+            String.format("ForLoop node '%s' first_index", this.getName())
+        );
+        final int last_index = TypeConverter.require_int(
+            last_value,
+            String.format("ForLoop node '%s' last_index", this.getName())
+        );
 
         // Runtime validation: ensure range is reasonable (prevent memory exhaustion)
         final long range = (long) last_index - (long) first_index + 1;
@@ -112,10 +87,10 @@ public class ForLoopNode extends BlueprintNode {
                     this.getName(), first_index, last_index)
             );
         }
-        if (range > 1000000) { // Max 1 million iterations
+        if (range > IBlueprintExecutor.MAX_ITERATIONS_PER_LOOP) {
             throw new IllegalStateException(
-                String.format("ForLoop node '%s': range too large [%d, %d] = %d iterations (max 1,000,000)",
-                    this.getName(), first_index, last_index, range)
+                String.format("ForLoop node '%s': range too large [%d, %d] = %d iterations (max %d)",
+                    this.getName(), first_index, last_index, range, IBlueprintExecutor.MAX_ITERATIONS_PER_LOOP)
             );
         }
 

@@ -154,11 +154,8 @@ public class BlueprintPin implements IBlueprintPin {
         }
 
         // Notify observers of topology change
-        final GraphTopologySubject subject = this.topology_subject != null ? this.topology_subject.get() : null;
-        if (subject != null) {
-            final String context = String.format("%s -> %s", output.getId(), input.getId());
-            subject.notify_observers(TopologyEventType.CONNECTION_ADDED, context);
-        }
+        final String context = String.format("%s -> %s", output.getId(), input.getId());
+        this.notify_topology_change(TopologyEventType.CONNECTION_ADDED, context);
     }
 
     @Override
@@ -237,6 +234,23 @@ public class BlueprintPin implements IBlueprintPin {
     @Override
     public String getDisplay() {
         return this.node.getName() + "." + this.name;
+    }
+
+    private void notify_topology_change(TopologyEventType type, String context) {
+        if (this.topology_subject == null) {
+            return;
+        }
+
+        final GraphTopologySubject subject = this.topology_subject.get();
+        if (subject == null) {
+            // Log warning: pin orphaned from graph
+            MinecraftBlueprints.LOGGER.warn(
+                    "Pin {} no longer attached to graph topology", this.getDisplay()
+            );
+            return;
+        }
+
+        subject.notify_observers(type, context);
     }
 
     @Override

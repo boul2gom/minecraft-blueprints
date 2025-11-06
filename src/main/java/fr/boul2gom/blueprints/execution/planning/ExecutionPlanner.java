@@ -23,6 +23,9 @@ import java.util.*;
  */
 public class ExecutionPlanner {
 
+    private static final int MIN_JOIN_INPUTS = 2;
+    private static final int MIN_FORK_OUTPUTS = 2;
+
     /**
      * Create an execution plan for a graph by analyzing its topology.
      *
@@ -113,12 +116,12 @@ public class ExecutionPlanner {
      */
     private static NodeExecutionType classify_node(int exec_inputs, int exec_outputs) {
         // JOIN has highest priority (synchronization required)
-        if (exec_inputs >= 2) {
+        if (exec_inputs >= MIN_JOIN_INPUTS) {
             return NodeExecutionType.JOIN;
         }
 
         // FORK for parallel execution
-        if (exec_outputs >= 2) {
+        if (exec_outputs >= MIN_FORK_OUTPUTS) {
             return NodeExecutionType.FORK;
         }
 

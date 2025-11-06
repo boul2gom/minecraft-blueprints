@@ -82,10 +82,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.is_valid = false; // Mark as needing validation
 
         // Defer cache invalidation if in batch mode
-        if (!this.batch_mode) {
-            this.entry_points_dirty = true; // Invalidate entry points cache
-            this.execution_plan_dirty = true; // Invalidate execution plan cache
-        }
+        if (!this.batch_mode) this.invalidate_caches();
 
         // Inject topology subject into all pins for observer notifications
         for (final IBlueprintPin pin : node.getInputs()) {
@@ -121,10 +118,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.is_valid = false; // Mark as needing validation
 
         // Defer cache invalidation if in batch mode
-        if (!this.batch_mode) {
-            this.entry_points_dirty = true; // Invalidate entry points cache
-            this.execution_plan_dirty = true; // Invalidate execution plan cache
-        }
+        if (!this.batch_mode) this.invalidate_caches();
     }
 
     @Override
@@ -163,10 +157,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.is_valid = false; // Mark as needing validation
 
         // Defer cache invalidation if in batch mode
-        if (!this.batch_mode) {
-            this.entry_points_dirty = true; // Invalidate entry points cache
-            this.execution_plan_dirty = true; // Invalidate execution plan cache
-        }
+        if (!this.batch_mode) this.invalidate_caches();
     }
 
     @Override
@@ -182,10 +173,7 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.is_valid = false; // Mark as needing validation
 
         // Defer cache invalidation if in batch mode
-        if (!this.batch_mode) {
-            this.entry_points_dirty = true; // Invalidate entry points cache
-            this.execution_plan_dirty = true; // Invalidate execution plan cache
-        }
+        if (!this.batch_mode) this.invalidate_caches();
     }
 
     @Override
@@ -259,8 +247,7 @@ public class BlueprintGraph implements IBlueprintGraph {
     public void end_batch() {
         this.batch_mode = false;
         // Invalidate cache now that batch is complete
-        this.entry_points_dirty = true;
-        this.execution_plan_dirty = true;
+        this.invalidate_caches();
     }
 
     /**
@@ -327,9 +314,13 @@ public class BlueprintGraph implements IBlueprintGraph {
         this.is_valid = true; // Empty graph is valid
 
         // Invalidate caches (always, even in batch mode, since we're clearing everything)
+        this.invalidate_caches();
         this.cached_entry_points = null;
-        this.entry_points_dirty = true;
         this.cached_execution_plan = null;
+    }
+
+    private void invalidate_caches() {
+        this.entry_points_dirty = true;
         this.execution_plan_dirty = true;
     }
 

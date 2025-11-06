@@ -45,10 +45,7 @@ public class BranchNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        final IBlueprintPin condition = this.getInput("condition");
-        if (condition == null || !condition.isConnected()) {
-            throw new ValidationException("Branch node requires 'condition' input to be connected");
-        }
+        require_connected("condition");
     }
 
     @Override

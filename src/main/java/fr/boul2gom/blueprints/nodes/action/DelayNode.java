@@ -9,6 +9,7 @@ import fr.boul2gom.blueprints.api.node.NodePosition;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
 import fr.boul2gom.blueprints.api.pin.PinType;
+import fr.boul2gom.blueprints.util.TypeConverter;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -46,10 +47,7 @@ public class DelayNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        final IBlueprintPin duration = this.getInput("duration_ticks");
-        if (duration == null || !duration.isConnected()) {
-            throw new IllegalStateException("Delay node requires 'duration_ticks' input to be connected");
-        }
+        require_connected("duration_ticks");
     }
 
     @Override
@@ -57,7 +55,7 @@ public class DelayNode extends BlueprintNode {
         final IBlueprintPin duration_pin = this.getInput("duration_ticks");
         final Object duration_value = context.get_pin_value(duration_pin);
 
-        final int duration_ticks = duration_value instanceof Number num ? num.intValue() : 20;
+        final int duration_ticks = TypeConverter.to_int(duration_value, 20);
         final Executor executor = MinecraftBlueprints.INSTANCE.getServer();
 
         // Schedule delayed execution using BlueprintScheduler

@@ -40,15 +40,7 @@ public class SetVariableNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        final IBlueprintPin name = this.getInput("name");
-        if (name == null || !name.isConnected()) {
-            throw new IllegalStateException("SetVariable node requires 'name' input to be connected");
-        }
-
-        final IBlueprintPin value = this.getInput("value");
-        if (value == null || !value.isConnected()) {
-            throw new IllegalStateException("SetVariable node requires 'value' input to be connected");
-        }
+        require_connected("name", "value");
     }
 
     @Override

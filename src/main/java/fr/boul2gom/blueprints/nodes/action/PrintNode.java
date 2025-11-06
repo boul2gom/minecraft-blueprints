@@ -27,15 +27,7 @@ public class PrintNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        // Validation: message input must be connected
-        final IBlueprintPin message = this.getInput("message");
-        if (message == null) {
-            throw new IllegalStateException("Print node requires 'message' input");
-        }
-
-        if (!message.isConnected()) {
-            throw new IllegalStateException("Print node requires 'message' input to be connected");
-        }
+        require_connected("message");
     }
 
     @Override

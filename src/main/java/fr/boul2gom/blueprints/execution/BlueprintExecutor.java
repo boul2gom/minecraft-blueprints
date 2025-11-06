@@ -96,6 +96,7 @@ public class BlueprintExecutor implements IBlueprintExecutor {
             }
 
             // 4. Initialize join counters for synchronization (per node-iteration)
+            // Thread-safe: Multiple CompletableFuture branches may update concurrently
             final Map<JoinKey, AtomicInteger> join_counters = new ConcurrentHashMap<>();
 
             // 5. Execute using async DAG traversal with join synchronization

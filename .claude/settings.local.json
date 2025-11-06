@@ -15,7 +15,8 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(/Users/boul2gom/Desktop/minecraft-blueprints/gradlew build --no-daemon)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

@@ -152,6 +152,40 @@ public abstract class BlueprintNode implements IBlueprintNode {
         }
     }
 
+    /**
+     * Helper method to validate that multiple input pins are connected.
+     * Reduces code duplication when validating several pins at once.
+     *
+     * @param pin_ids the IDs of the input pins to check
+     * @throws IllegalStateException if any pin is not found or not connected
+     */
+    protected void require_connected(String... pin_ids) {
+        for (final String pin_id : pin_ids) {
+            require_connected(pin_id);
+        }
+    }
+
+    /**
+     * Helper method to validate that at least one of the specified input pins is connected.
+     * Useful for nodes where multiple alternative inputs are valid.
+     *
+     * @param pin_ids the IDs of the input pins to check
+     * @throws IllegalStateException if none of the pins are connected
+     */
+    protected void require_any_connected(String... pin_ids) {
+        for (final String pin_id : pin_ids) {
+            final IBlueprintPin pin = this.getInput(pin_id);
+            if (pin != null && pin.isConnected()) {
+                return;
+            }
+        }
+
+        throw new IllegalStateException(
+            String.format("%s: at least one of [%s] must be connected",
+                this.name, String.join(", ", pin_ids))
+        );
+    }
+
     @Override
     public String toString() {
         return String.format("BlueprintNode(id=%s, name=%s, inputs=%d, outputs=%d, position=%s)",

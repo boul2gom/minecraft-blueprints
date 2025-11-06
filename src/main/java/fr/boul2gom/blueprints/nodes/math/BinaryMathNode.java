@@ -6,6 +6,7 @@ import fr.boul2gom.blueprints.api.node.BlueprintNode;
 import fr.boul2gom.blueprints.api.node.NodePosition;
 import fr.boul2gom.blueprints.api.node.utils.NodeConfig;
 import fr.boul2gom.blueprints.api.pin.IBlueprintPin;
+import fr.boul2gom.blueprints.util.TypeConverter;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -37,16 +38,7 @@ public abstract class BinaryMathNode extends BlueprintNode {
 
     @Override
     public void validate() {
-        final IBlueprintPin a = this.getInput("a");
-        final IBlueprintPin b = this.getInput("b");
-
-        if (a == null || !a.isConnected()) {
-            throw new ValidationException(String.format("%s node requires 'a' input to be connected", this.getName()));
-        }
-
-        if (b == null || !b.isConnected()) {
-            throw new ValidationException(String.format("%s node requires 'b' input to be connected", this.getName()));
-        }
+        require_connected("a", "b");
     }
 
     @Override
@@ -57,9 +49,15 @@ public abstract class BinaryMathNode extends BlueprintNode {
         final Object a_value = context.get_pin_value(a_pin);
         final Object b_value = context.get_pin_value(b_pin);
 
-        // Convert to numbers (default to 0 if not a number)
-        final double a = a_value instanceof Number num ? num.doubleValue() : 0.0;
-        final double b = b_value instanceof Number num ? num.doubleValue() : 0.0;
+        // Convert to numbers using TypeConverter
+        final double a = TypeConverter.require_double(
+            a_value,
+            String.format("%s node input 'a'", this.getName())
+        );
+        final double b = TypeConverter.require_double(
+            b_value,
+            String.format("%s node input 'b'", this.getName())
+        );
 
         // Perform operation
         final double result = this.compute(a, b);

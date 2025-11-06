@@ -164,4 +164,43 @@ public class TypeConverter {
         }
         return (String) value;
     }
+
+    /**
+     * Validates that a value is a Number and converts it to an int.
+     * Throws an exception if the value is not a Number.
+     *
+     * @param value the value to validate and convert
+     * @param context_message context message for the exception
+     * @return the value as an int
+     * @throws IllegalStateException if value is not a Number
+     */
+    public static int require_int(Object value, String context_message) {
+        return require_number(value, context_message).intValue();
+    }
+
+    /**
+     * Validates that a value is a Number and converts it to a float.
+     * Throws an exception if the value is not a Number.
+     *
+     * @param value the value to validate and convert
+     * @param context_message context message for the exception
+     * @return the value as a float
+     * @throws IllegalStateException if value is not a Number
+     */
+    public static float require_float(Object value, String context_message) {
+        return require_number(value, context_message).floatValue();
+    }
+
+    /**
+     * Validates that a value is a Number and converts it to a double.
+     * Throws an exception if the value is not a Number.
+     *
+     * @param value the value to validate and convert
+     * @param context_message context message for the exception
+     * @return the value as a double
+     * @throws IllegalStateException if value is not a Number
+     */
+    public static double require_double(Object value, String context_message) {
+        return require_number(value, context_message).doubleValue();
+    }
 }

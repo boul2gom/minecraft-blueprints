@@ -25,11 +25,16 @@ import java.time.Instant;
  * - IterationTracker: Loop iteration tracking
  * - ExecutionMonitor: Safety limits and execution statistics
  *
- * Thread-safety: NOT THREAD-SAFE
+ * Thread-safety: SINGLE-THREADED ASYNC
+ * - All operations execute on the same thread (Minecraft server thread)
+ * - CompletableFuture chains execute sequentially on server thread via executor
+ * - NOT SAFE for concurrent access from multiple threads
  * - Each ExecutionContext instance must be used by only one execution at a time
  * - Do NOT share an ExecutionContext across multiple concurrent blueprint executions
  * - Create a new ExecutionContext for each blueprint execution
  * - Internal state (current_node, pin values, iteration counters) is not synchronized
+ * - The async execution model (.thenComposeAsync) runs all callbacks on the server thread,
+ *   ensuring sequential access to this context even though execution is asynchronous
  *
  * Resource management: AUTOCLOSEABLE
  * - Implements AutoCloseable for proper resource cleanup
@@ -62,6 +67,13 @@ public class ExecutionContext implements IExecutionContext {
     }
 
     public ExecutionContext(@Nullable World world, @Nullable Entity entity, Duration timeout, int max_nodes, boolean logging) {
+        if (timeout.isNegative() || timeout.isZero()) {
+            throw new IllegalArgumentException("Timeout must be positive: " + timeout);
+        }
+        if (max_nodes <= 0) {
+            throw new IllegalArgumentException("Max nodes must be positive: " + max_nodes);
+        }
+
         // Initialize providers
         this.variable_registry = new VariableRegistry();
         this.variable_provider = new VariableProvider(this.variable_registry);
